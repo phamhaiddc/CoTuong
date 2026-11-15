@@ -1,0 +1,331 @@
+/* Sảnh Cờ úp (/co-up) — tiền tố cu- */
+.cu {
+  display: grid;
+  grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+.cu-main {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+.cu-lobby {
+  padding: 0;
+}
+.cu-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px 10px;
+  border-radius: inherit;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--primary-soft) 80%, transparent), transparent);
+}
+.cu-head p {
+  margin: 0;
+}
+.cu-emblem {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #9a2a20;
+  color: #e2bd78;
+  box-shadow: var(--shadow-sm), 0 0 0 2px #e2bd78 inset;
+}
+.cu-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+.cu-tabs {
+  margin: 0 12px;
+  width: auto;
+}
+.cu-body {
+  padding: 12px 14px 14px;
+}
+.cu-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cu-block p {
+  margin: 0;
+}
+.cu-block-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cu-block-head .icon {
+  color: var(--primary-ink);
+}
+.cu-block-head .chip {
+  margin-left: auto;
+}
+.cu-time {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.cu-time label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+.cu-join {
+  display: flex;
+  gap: 6px;
+}
+.cu-join input {
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-family: var(--font-mono);
+}
+.cu-grid3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+.cu-choices {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.cu-choices legend {
+  margin-bottom: 6px;
+}
+.cu-choice {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-raised);
+  cursor: pointer;
+  text-align: center;
+  font-size: 0.86rem;
+  transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.cu-choice input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.cu-choice:hover {
+  border-color: var(--border-strong);
+}
+.cu-choice.active {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary-ink);
+}
+.cu-choice:has(input:focus-visible) {
+  box-shadow: var(--focus-ring);
+}
+.cu-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.cu-center {
+  text-align: center;
+  margin: 0;
+}
+.cu-search,
+.cu-wait {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.cu-spin {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #9a2a20;
+  color: #e2bd78;
+  box-shadow: 0 0 0 6px var(--primary-soft);
+  animation: cu-flip 1.6s var(--ease) infinite;
+}
+@keyframes cu-flip {
+  0%,
+  100% {
+    transform: scaleX(1);
+  }
+  50% {
+    transform: scaleX(0.1);
+  }
+}
+.cu-search-title {
+  font-weight: 700;
+}
+.cu-search-time {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--primary-ink);
+  line-height: 1.05;
+}
+.cu-code {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  font-family: var(--font-mono);
+  color: var(--primary-ink);
+}
+.cu-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+.cu-link {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+}
+.cu-link input {
+  font-size: 0.82rem;
+}
+.cu-search .btn,
+.cu-wait .btn-block {
+  width: 100%;
+}
+/* Thẻ phòng chờ, gợi ý khi chờ lâu, thao tác trong thông báo */
+.cu-wait-title {
+  margin: 0;
+  font-weight: 700;
+  text-align: center;
+}
+.cu-code-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.cu-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0;
+  line-height: 1.4;
+}
+.cu-note .icon {
+  flex: none;
+  margin-top: 2px;
+}
+.cu-suggest {
+  width: 100%;
+  text-align: left;
+}
+.cu-suggest-actions,
+.cu-notice-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 6px;
+}
+.cu-suggest-actions {
+  gap: 8px;
+}
+.cu-search .cu-suggest-actions .btn {
+  width: auto;
+  flex: 1 1 auto;
+}
+.cu-notice-actions .link-btn {
+  min-height: 30px;
+}
+.cu-block .cu-join-label {
+  margin: 4px 0 -2px;
+}
+.cu-hint {
+  margin: -4px 0 0;
+}
+.cu-rules .panel-title {
+  font-size: 1rem;
+}
+.cu-rule-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.cu-rule-list li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 0.88rem;
+  color: var(--text-2);
+  line-height: 1.45;
+}
+.cu-rule-ico {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--primary-ink);
+}
+.cu-board {
+  margin: 0;
+  position: sticky;
+  top: calc(var(--header-h) + 20px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.cu-board .board-wrap {
+  --board-reserve: 150px;
+  --board-max: 760px;
+}
+.cu-board .board-svg {
+  pointer-events: none;
+}
+@media (max-width: 1199px) {
+  .cu {
+    grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
+    gap: 20px;
+  }
+}
+@media (max-width: 760px) {
+  .cu {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+  .cu-board {
+    position: static;
+  }
+  .cu-board .board-wrap {
+    max-width: 460px;
+  }
+  .cu-tabs button {
+    min-height: 40px;
+  }
+}

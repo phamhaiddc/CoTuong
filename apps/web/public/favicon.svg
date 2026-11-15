@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <radialGradient id="f" cx="38%" cy="32%" r="75%">
+      <stop offset="0%" stop-color="#fff6e3"/>
+      <stop offset="100%" stop-color="#e9c88f"/>
+    </radialGradient>
+  </defs>
+  <circle cx="32" cy="32" r="31" fill="#b3261e"/>
+  <circle cx="32" cy="32" r="27" fill="url(#f)"/>
+  <circle cx="32" cy="32" r="22" fill="none" stroke="#b3261e" stroke-width="2.2"/>
+  <text x="32" y="43" text-anchor="middle" font-size="29" font-weight="700" font-family="KaiTi, STKaiti, SimSun, serif" fill="#b3261e">帥</text>
+</svg>

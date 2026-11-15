@@ -1,0 +1,50 @@
+# Hạ tầng cho môi trường phát triển: PostgreSQL, Redis, object storage chuẩn S3 (SeaweedFS), SMTP giả (Mailpit).
+# Production dùng docker-compose.prod.yml (README mục "Triển khai bằng Docker"); nhà cung cấp hosting chưa chốt.
+# CHỈ DÙNG CHO MÁY DEV: mật khẩu mặc định, Redis/S3 không xác thực → các cổng chỉ mở trên 127.0.0.1 (máy này).
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: cotuong
+      POSTGRES_PASSWORD: cotuong
+      POSTGRES_DB: cotuong
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cotuong -d cotuong"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    # Giới hạn bộ nhớ; đầy thì từ chối ghi thêm (không tự xoá phiên đăng nhập / ván đang chơi)
+    command: redis-server --maxmemory 512mb --maxmemory-policy noeviction
+    ports:
+      - "127.0.0.1:6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # Object storage chuẩn S3 (SeaweedFS, cổng S3 8333). Production có thể thay bằng bất kỳ dịch vụ S3 nào.
+  s3:
+    image: chrislusf/seaweedfs:latest
+    command: server -dir=/data -s3 -s3.port=8333
+    ports:
+      - "127.0.0.1:8333:8333"
+    volumes:
+      - s3data:/data
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "127.0.0.1:1025:1025"
+      - "127.0.0.1:8025:8025"
+
+volumes:
+  pgdata:
+  s3data:

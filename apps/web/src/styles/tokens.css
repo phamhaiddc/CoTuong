@@ -1,0 +1,147 @@
+/* ==========================================================================
+   Design tokens — sáng (mặc định) và tối ([data-theme='dark'] trên <html>)
+   Mọi màu trong các file CSS khác phải lấy từ các biến này.
+   ========================================================================== */
+:root {
+  color-scheme: light;
+
+  /* Nền & bề mặt */
+  --bg: #f4eee4;
+  --bg-accent: radial-gradient(1200px 600px at 10% -10%, rgba(179, 38, 30, 0.07), transparent 60%),
+    radial-gradient(900px 500px at 110% 10%, rgba(200, 150, 43, 0.08), transparent 60%);
+  --surface: #fffdf9;
+  --surface-2: #f8f2e8;
+  --surface-3: #efe5d4;
+  --surface-raised: #ffffff;
+  --overlay: rgba(28, 18, 10, 0.5);
+
+  /* Viền */
+  --border: #e7ddcc;
+  --border-strong: #d4c3a6;
+
+  /* Chữ */
+  --text: #2a211a;
+  --text-2: #5c4e42;
+  /* Chữ phụ (gợi ý, ngày giờ, chú thích…): đủ 4.5:1 trên mọi nền sáng (--bg … --surface-3) */
+  --muted: #736353;
+  --on-primary: #ffffff;
+
+  /* Thương hiệu: đỏ sơn mài + vàng */
+  --primary: #b3261e;
+  --primary-hover: #961e17;
+  /* Chữ / liên kết màu thương hiệu trên nền thường (giao diện sáng: chính là --primary) */
+  --primary-ink: #b3261e;
+  --primary-soft: #f9e5e1;
+  --primary-ring: rgba(179, 38, 30, 0.28);
+  --gold: #c8962b;
+  --gold-soft: #f8eed6;
+  --gold-ink: #7a5a10;
+
+  /* Trạng thái */
+  --ok: #2e7d4f;
+  --ok-soft: #e2f2e8;
+  --warn: #a35d00;
+  --warn-soft: #fff0d4;
+  --danger: #c0392b;
+  --danger-soft: #fbe5e2;
+  --info: #2b6cb0;
+  --info-soft: #e4eef9;
+
+  /* Huy chương */
+  --medal-gold: #d4a017;
+  --medal-silver: #9aa3a8;
+  --medal-bronze: #b0703c;
+
+  /* Đồng hồ */
+  --clock-bg: var(--surface-2);
+  --clock-text: var(--text-2);
+  --clock-run-bg: #2a211a;
+  --clock-run-text: #ffffff;
+  --clock-low-bg: #c0392b;
+
+  /* Hình khối */
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 18px;
+  --radius-pill: 999px;
+  --shadow-sm: 0 1px 2px rgba(60, 40, 20, 0.08);
+  --shadow: 0 1px 2px rgba(60, 40, 20, 0.06), 0 4px 16px rgba(60, 40, 20, 0.07);
+  --shadow-lg: 0 12px 40px rgba(40, 25, 10, 0.22);
+  --focus-ring: 0 0 0 3px var(--primary-ring);
+
+  /* Kích thước khung */
+  --header-h: 60px;
+  --bottom-nav-h: 0px;
+  --content-max: 1440px;
+  --gutter: 20px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  /* Chữ */
+  --font: 'Be Vietnam Pro', 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, 'Cascadia Mono', 'SF Mono', Consolas, 'Courier New', monospace;
+  --font-han: KaiTi, STKaiti, 'Kaiti SC', 'Noto Serif SC', 'Noto Serif CJK SC', 'Songti SC', SimSun, serif;
+
+  /* Chuyển động */
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur: 160ms;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: #14110e;
+  --bg-accent: radial-gradient(1200px 600px at 10% -10%, rgba(224, 87, 74, 0.1), transparent 60%),
+    radial-gradient(900px 500px at 110% 10%, rgba(224, 177, 74, 0.07), transparent 60%);
+  --surface: #1e1915;
+  --surface-2: #27211c;
+  --surface-3: #312922;
+  --surface-raised: #241e19;
+  --overlay: rgba(0, 0, 0, 0.6);
+
+  --border: #372e26;
+  --border-strong: #4b3f34;
+
+  --text: #f3ebe1;
+  --text-2: #cfc2b3;
+  --muted: #9b8d7e;
+  --on-primary: #ffffff;
+
+  /* Nền nút chính / phần đang chọn (chữ trắng ≥ 5.3:1); di chuột thì đậm hơn (≥ 6.2:1) */
+  --primary: #c23a2e;
+  --primary-hover: #b03328;
+  /* Chữ đỏ trên nền tối: sáng hơn để đủ 4.5:1 trên mọi nền (--bg … --surface-3, nền --primary-soft) */
+  --primary-ink: #ec7064;
+  --primary-soft: rgba(217, 72, 59, 0.16);
+  --primary-ring: rgba(230, 93, 80, 0.4);
+  --gold: #e0b14a;
+  --gold-soft: rgba(224, 177, 74, 0.14);
+  --gold-ink: #f0cf7d;
+
+  --ok: #5cc08a;
+  --ok-soft: rgba(92, 192, 138, 0.14);
+  --warn: #e7a74c;
+  --warn-soft: rgba(231, 167, 76, 0.14);
+  --danger: #f06b5e;
+  --danger-soft: rgba(240, 107, 94, 0.14);
+  --info: #6aa8e8;
+  --info-soft: rgba(106, 168, 232, 0.14);
+
+  --clock-bg: var(--surface-3);
+  --clock-text: var(--text-2);
+  --clock-run-bg: #f3ebe1;
+  --clock-run-text: #14110e;
+  --clock-low-bg: #d9483b;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 6px 20px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.55);
+}
+
+@media (max-width: 760px) {
+  :root {
+    --header-h: 56px;
+    --bottom-nav-h: 62px;
+    --gutter: 12px;
+  }
+}

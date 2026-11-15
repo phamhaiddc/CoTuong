@@ -1,0 +1,1120 @@
+/* Cờ thế: danh sách (/co-the) và màn hình giải thế (/co-the/:id) */
+
+/* ==========================================================================
+   [puzzles-core] DANH SÁCH CỜ THẾ (/co-the) — PuzzlesPage.tsx
+   Tiền tố lớp: .pz-*   (bàn cờ thu nhỏ .pz-thumb dùng lại được ở trang khác)
+   ========================================================================== */
+.pz-page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* --------------------------------------------------------------- Đầu trang */
+.pz-hero {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(260px, 300px);
+  align-items: center;
+  gap: 18px 28px;
+  padding: 26px 28px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(
+    120deg,
+    color-mix(in srgb, var(--primary-soft) 80%, var(--surface)) 0%,
+    var(--surface) 48%,
+    color-mix(in srgb, var(--gold-soft) 85%, var(--surface)) 100%
+  );
+  box-shadow: var(--shadow);
+}
+.pz-hero-text {
+  min-width: 0;
+}
+.pz-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--primary-ink);
+}
+.pz-title {
+  font-size: 1.9rem;
+  margin-bottom: 10px;
+  letter-spacing: -0.02em;
+}
+.pz-title-sep {
+  color: var(--gold);
+}
+.pz-title-name {
+  white-space: nowrap;
+}
+.pz-lead {
+  max-width: 62ch;
+  margin: 0;
+  color: var(--text-2);
+}
+/* Tên tuyển tập viết dọc như một bức thư pháp nhỏ */
+.pz-hero-art {
+  writing-mode: vertical-rl;
+  font-family: var(--font-han);
+  font-size: 2.15rem;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  color: var(--primary-ink);
+  opacity: 0.2;
+  user-select: none;
+  padding: 2px 4px;
+  border-left: 2px solid color-mix(in srgb, var(--primary) 30%, transparent);
+  border-right: 2px solid color-mix(in srgb, var(--primary) 30%, transparent);
+}
+
+/* Thẻ tiến độ */
+.pz-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  min-width: 0;
+}
+.pz-progress-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.pz-progress-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.pz-progress-count {
+  color: var(--text-2);
+  font-weight: 600;
+}
+.pz-progress-count b {
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--text);
+}
+.pz-bar {
+  height: 10px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-3);
+  overflow: hidden;
+}
+.pz-bar-fill {
+  display: block;
+  height: 100%;
+  min-width: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--primary), color-mix(in srgb, var(--primary) 45%, var(--gold)));
+  transition: width 400ms var(--ease);
+}
+.pz-next {
+  justify-content: space-between;
+}
+.pz-progress-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+}
+.pz-progress-title .icon {
+  color: var(--primary-ink);
+}
+.pz-progress-note {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 0.86rem;
+}
+.pz-done {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ok);
+  font-weight: 600;
+}
+.pz-progress-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.pz-progress-error {
+  border-color: color-mix(in srgb, var(--danger) 35%, var(--border));
+  background: color-mix(in srgb, var(--danger-soft) 55%, var(--surface-raised));
+}
+.pz-progress-error .pz-progress-title .icon {
+  color: var(--danger);
+}
+.pz-progress-error .btn {
+  align-self: flex-start;
+}
+.pz-s-line {
+  display: block;
+  height: 12px;
+  width: 70%;
+}
+.pz-s-line.short {
+  width: 45%;
+}
+.pz-s-bar {
+  display: block;
+  height: 10px;
+  border-radius: var(--radius-pill);
+}
+
+/* --------------------------------------------------------------- Lọc & tìm */
+.pz-toolbar {
+  position: sticky;
+  top: var(--header-h);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 14px;
+  flex-wrap: wrap;
+  margin: -6px 0 -8px;
+  padding: 10px 0;
+  background: color-mix(in srgb, var(--bg) 86%, transparent);
+  backdrop-filter: saturate(1.3) blur(10px);
+  -webkit-backdrop-filter: saturate(1.3) blur(10px);
+}
+.pz-filter button {
+  min-height: 36px;
+}
+.pz-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-3);
+  color: var(--text-2);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+/* Số đếm trên nút đang chọn (nền đỏ): nền tối hơn một chút để chữ trắng đủ tương phản (≥ 4.5:1) ở cả hai giao diện */
+.pz-filter button.active .pz-count {
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--on-primary);
+}
+.pz-search {
+  position: relative;
+  flex: 1 1 260px;
+  max-width: 380px;
+  display: flex;
+  align-items: center;
+}
+.pz-search > .icon {
+  position: absolute;
+  left: 13px;
+  color: var(--muted);
+  pointer-events: none;
+}
+.pz-search input {
+  padding-left: 40px;
+  padding-right: 40px;
+  border-radius: var(--radius-pill);
+}
+.pz-search input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+.pz-search-clear {
+  position: absolute;
+  right: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+.pz-search-clear:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.pz-search-clear:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+.pz-result-count {
+  margin: 0 0 -6px;
+}
+
+/* --------------------------------------------------------------- Lưới thẻ */
+.pz-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(178px, 1fr));
+  gap: 14px;
+}
+.pz-item {
+  min-width: 0;
+  /* 100 thẻ có bàn cờ: trình duyệt bỏ qua phần nằm ngoài màn hình */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 330px;
+}
+.pz-card {
+  position: relative;
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  text-decoration: none;
+  transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+a.pz-card:hover {
+  text-decoration: none;
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--primary) 38%, var(--border));
+  box-shadow: var(--shadow);
+}
+a.pz-card:focus-visible {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: var(--focus-ring);
+}
+.pz-card.is-solved {
+  border-color: color-mix(in srgb, var(--ok) 38%, var(--border));
+}
+.pz-thumb-box {
+  position: relative;
+  display: block;
+  padding: 10px 10px 0;
+}
+.pz-solved-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--ok);
+  color: #fff;
+  box-shadow: 0 0 0 2px var(--surface), var(--shadow-sm);
+}
+.pz-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  padding: 10px 12px 12px;
+}
+.pz-num {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.pz-han {
+  font-family: var(--font-han);
+  font-size: 1.28rem;
+  line-height: 1.3;
+  letter-spacing: 0.05em;
+  color: var(--text);
+}
+.pz-viet {
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text-2);
+}
+.pz-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: auto;
+  padding-top: 10px;
+}
+.pz-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-3);
+  color: var(--text-2);
+  font-size: 0.74rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.pz-tag-mate {
+  background: var(--gold-soft);
+  color: var(--gold-ink);
+}
+.pz-status {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+.pz-status-ok {
+  color: var(--ok);
+}
+/* Đang tải tiến độ */
+.pz-card-skel {
+  gap: 8px;
+  padding: 10px 10px 14px;
+}
+.pz-s-thumb {
+  display: block;
+  aspect-ratio: 92 / 102;
+  border-radius: 4px;
+}
+
+.pz-empty {
+  padding: 8px;
+}
+.pz-empty-btn {
+  margin-top: 10px;
+}
+
+/* --------------------------------------------------------------- Bàn cờ thu nhỏ (màu "vật liệu" như board.css) */
+.pz-thumb {
+  --pz-wood: #f3d6a2;
+  --pz-wood-edge: #d9ad6e;
+  --pz-ink: #5b3a1d;
+  --pz-face: #fff7e8;
+  --pz-red: #b21f19;
+  --pz-black: #1e1915;
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 92 / 102;
+}
+:root[data-theme='dark'] .pz-thumb {
+  --pz-wood: #d6ae76;
+  --pz-wood-edge: #a87841;
+  --pz-ink: #3a220f;
+  --pz-face: #f5e8cc;
+  --pz-red: #a81c16;
+  --pz-black: #17120f;
+}
+.pz-thumb-wood {
+  fill: var(--pz-wood);
+  stroke: var(--pz-wood-edge);
+  stroke-width: 1;
+}
+.pz-thumb-grid {
+  fill: none;
+  stroke: var(--pz-ink);
+  stroke-width: 0.5;
+  opacity: 0.7;
+}
+.pz-thumb-edge {
+  fill: none;
+  stroke: var(--pz-ink);
+  stroke-width: 0.9;
+  opacity: 0.85;
+}
+.pz-pc circle {
+  fill: var(--pz-face);
+  stroke-width: 0.7;
+}
+.pz-pc text {
+  font-family: 'LXGW WenKai TC', var(--font-han);
+  font-size: 6.1px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+.pz-pc.red circle {
+  stroke: var(--pz-red);
+}
+.pz-pc.red text {
+  fill: var(--pz-red);
+}
+.pz-pc.black circle {
+  stroke: var(--pz-black);
+}
+.pz-pc.black text {
+  fill: var(--pz-black);
+}
+
+/* --------------------------------------------------------------- Nguồn */
+.pz-source {
+  margin-top: 6px;
+}
+.pz-source-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pz-source-title .icon {
+  color: var(--gold);
+}
+.pz-source-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+  gap: 18px 24px;
+  align-items: start;
+}
+.pz-source-text p {
+  color: var(--text-2);
+  font-size: 0.92rem;
+}
+.pz-source-text p:last-child {
+  margin-bottom: 0;
+}
+.pz-source code {
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+  padding: 1px 6px;
+  border-radius: var(--radius-xs);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  overflow-wrap: anywhere;
+}
+.pz-ext {
+  margin-left: 2px;
+  vertical-align: -1px;
+}
+.pz-facts {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+.pz-facts dt {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.pz-facts dd {
+  margin: 1px 0 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.pz-license-link {
+  font-weight: 600;
+  white-space: nowrap;
+}
+.pz-license-intro {
+  font-size: 0.9rem;
+}
+.pz-license {
+  margin: 0;
+  max-height: min(52vh, 420px);
+  overflow: auto;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.8rem;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+.pz-license p {
+  margin: 0 0 10px;
+}
+.pz-license p:first-child {
+  font-weight: 700;
+}
+.pz-license p:last-child {
+  margin-bottom: 0;
+}
+.pz-license:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* --------------------------------------------------------------- Máy tính bảng */
+@media (max-width: 1199px) {
+  .pz-hero {
+    grid-template-columns: minmax(0, 1fr) minmax(250px, 280px);
+  }
+  .pz-hero-art {
+    display: none;
+  }
+}
+@media (max-width: 900px) {
+  .pz-hero {
+    padding: 22px;
+    gap: 16px 22px;
+  }
+  .pz-title {
+    font-size: 1.6rem;
+  }
+  .pz-source-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* --------------------------------------------------------------- Điện thoại */
+@media (max-width: 760px) {
+  .pz-page {
+    gap: 14px;
+  }
+  .pz-hero {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 18px 16px 16px;
+    gap: 14px;
+    border-radius: var(--radius);
+  }
+  .pz-title {
+    font-size: 1.4rem;
+    margin-bottom: 6px;
+  }
+  .pz-lead {
+    font-size: 0.9rem;
+  }
+  .pz-progress {
+    padding: 12px 14px;
+  }
+  /* Thanh lọc không dính trên điện thoại (đỡ chiếm chỗ), xếp 2 hàng */
+  .pz-toolbar {
+    position: static;
+    margin: 0;
+    padding: 0;
+    background: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .pz-filter {
+    display: flex;
+    width: 100%;
+  }
+  .pz-filter button {
+    flex: 1;
+    min-height: 40px;
+    padding: 0 8px;
+  }
+  .pz-search {
+    flex-basis: 100%;
+    max-width: none;
+  }
+  .pz-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .pz-item {
+    contain-intrinsic-size: auto 300px;
+  }
+  .pz-source-text p {
+    font-size: 0.88rem;
+  }
+}
+@media (max-width: 400px) {
+  .pz-kicker {
+    display: none;
+  }
+}
+@media (max-width: 360px) {
+  .pz-filter button {
+    padding: 0 6px;
+    font-size: 0.84rem;
+  }
+  .pz-count {
+    min-width: 18px;
+    padding: 0 4px;
+  }
+}
+
+/* Kích thước bên trong thẻ theo bề rộng của chính thẻ (máy tính bảng 4 cột, điện thoại 2 cột):
+   thu nhỏ nhãn để "Chiếu hết trong NN nước" luôn nằm trên một dòng */
+@container (max-width: 192px) {
+  .pz-card-body {
+    padding: 9px 10px 11px;
+  }
+  .pz-tag {
+    padding: 2px 7px;
+    font-size: 0.68rem;
+  }
+  .pz-han {
+    font-size: 1.16rem;
+  }
+  .pz-viet {
+    font-size: 0.84rem;
+  }
+}
+@container (max-width: 168px) {
+  .pz-thumb-box {
+    padding: 7px 7px 0;
+  }
+  .pz-card-body {
+    padding: 8px 8px 10px;
+  }
+  .pz-tag {
+    font-size: 0.66rem;
+  }
+}
+
+/* Điện thoại rất hẹp (≤340px): một cột, thẻ nằm ngang (bàn cờ bên trái, chữ bên phải) */
+@media (max-width: 340px) {
+  .pz-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .pz-item {
+    contain-intrinsic-size: auto 150px;
+  }
+  .pz-card {
+    flex-direction: row;
+  }
+  .pz-thumb-box {
+    flex: none;
+    width: 116px;
+    padding: 8px 0 8px 8px;
+  }
+  .pz-solved-badge {
+    top: 3px;
+    right: -6px;
+  }
+  .pz-card-body {
+    padding: 8px 10px 10px 12px;
+  }
+  .pz-tag {
+    padding: 2px 7px;
+    font-size: 0.68rem;
+  }
+}
+
+/* ==========================================================================
+   [hết phần puzzles-core] — phần màn hình giải thế (/co-the/:id) viết bên dưới
+   ========================================================================== */
+
+/* ==========================================================================
+   [puzzle-play] Màn hình giải thế /co-the/:id — PuzzlePage.tsx (khung chung <GameScreen>, play.css).
+   Mọi luật ở đây đều nằm dưới .play.pzp để không ảnh hưởng các màn hình ván đấu khác.
+     .pzp-head     thẻ thế cờ: ‹ Thế 012 · tên chữ Hán · Hán Việt · mục tiêu ›
+                   (xếp chồng: đầu trang, trên bàn cờ; máy tính: đầu khung bên phải)
+     .pzp-status   ô trạng thái + bộ đếm nước (.pzp-counter)
+     .pzp-sol-*    chế độ xem lời giải (thanh điều khiển từng nước)
+   ========================================================================== */
+
+/* ---- Bố cục xếp chồng (điện thoại, máy tính bảng dọc): thẻ thế cờ lên đầu, bàn cờ nhường chỗ cho nó */
+.play.pzp {
+  --pzh-h: 74px; /* chiều cao thẻ thế cờ khi xếp chồng */
+  --board-h: calc(
+    100dvh - var(--header-h) - var(--top-pad) - var(--bottom-gap) - 2 * var(--bar-h) - 2 * var(--col-gap) - var(--dock-h) -
+      var(--pzh-h) - var(--play-gap)
+  );
+}
+.play.pzp > .pzp-head {
+  order: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    'prev id next'
+    'prev name next'
+    'prev goal next';
+  align-items: center;
+  column-gap: 4px;
+  row-gap: 1px;
+  min-height: var(--pzh-h);
+  padding: 6px 4px;
+}
+.pzp-prev {
+  grid-area: prev;
+}
+.pzp-next {
+  grid-area: next;
+}
+.pzp-id {
+  grid-area: id;
+}
+.pzp-name {
+  grid-area: name;
+}
+.pzp-goal {
+  grid-area: goal;
+}
+.pzp-nav {
+  --btn-h: 44px;
+  align-self: center;
+  color: var(--text-2);
+}
+.pzp-nav:disabled {
+  opacity: 0.3;
+}
+
+.pzp-id {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.pzp-code {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--primary-ink);
+}
+.pzp-solved {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 8px 1px 6px;
+  border-radius: var(--radius-pill);
+  background: var(--ok-soft);
+  color: color-mix(in srgb, var(--ok) 80%, var(--text));
+  font-size: 0.7rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.pzp-name {
+  display: flex;
+  align-items: baseline;
+  gap: 2px 10px;
+  min-width: 0;
+  margin: 0;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: 1.25;
+}
+.pzp-han {
+  flex: none;
+  font-family: var(--font-han);
+  font-size: 1.18rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--text);
+}
+.pzp-viet {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-2);
+}
+
+.pzp-goal {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.3;
+  color: var(--text-2);
+}
+.pzp-goal > .icon {
+  flex: none;
+  color: var(--muted);
+}
+.pzp-goal.is-proven > .icon {
+  color: var(--gold);
+}
+.pzp-goal-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pzp-goal b {
+  font-weight: 700;
+  color: var(--text);
+}
+.pzp-goal.is-proven b {
+  color: var(--gold-ink);
+}
+.pzp-unverified {
+  flex: none;
+  padding: 1px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-3);
+  color: var(--text-2);
+  font-size: 0.68rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: help;
+}
+
+/* ---- Ô trạng thái: bộ đếm nước ở bên phải */
+.pzp-counter {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 1px;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+  color: var(--text-2);
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+.pzp-counter b {
+  font-size: 1.02rem;
+  font-weight: 800;
+  color: var(--text);
+}
+.pzp-counter small {
+  margin-left: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+/* Xem lời giải: tông vàng (khác lượt đi xanh / chiếu đỏ) */
+.status-card.tone-solution {
+  background: var(--gold-soft);
+  border-color: color-mix(in srgb, var(--gold) 45%, transparent);
+}
+.tone-solution .status-icon {
+  background: color-mix(in srgb, var(--gold) 22%, transparent);
+  color: var(--gold-ink);
+}
+.tone-solution .status-title {
+  color: var(--gold-ink);
+}
+.pzp-save .link-btn {
+  flex: none;
+  font-weight: 700;
+}
+.pzp-guest a {
+  font-weight: 700;
+}
+
+/* ---- Lời giải: nút tiến ở giữa nổi bật; trên bàn cờ không có tương tác */
+.pzp-viewing .board-area {
+  cursor: default;
+}
+.pzp-sol-exit {
+  font-weight: 700;
+}
+
+/* ---- Hộp thoại kết quả */
+.pzp-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+}
+.pzp-stat-num {
+  font-size: 2.8rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--gold-ink);
+}
+.pzp-stat-label {
+  margin-top: 4px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.pzp-result .pzp-save {
+  justify-content: center;
+  text-align: left;
+  max-width: 100%;
+}
+.pzp-result .result-note + .pzp-usage {
+  margin-top: -8px;
+}
+.pzp-usage {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+/* ---- Chân khung bên */
+.pzp-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.pzp-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+/* ---- Điện thoại */
+@media (max-width: 760px) {
+  .play.pzp {
+    --pzh-h: 70px;
+  }
+  .play.pzp > .pzp-head {
+    padding: 4px 2px;
+    border-radius: var(--radius);
+  }
+  .pzp-nav {
+    --btn-h: 42px;
+  }
+  /* Lời giải: 5 nút điều khiển + lật bàn trên một hàng */
+  .pzp-viewing .gs-toolbar .act,
+  .pzp-viewing .gs-view .act-flip {
+    font-size: 0.7rem;
+  }
+  .pzp-viewing .gs-toolbar .act.pzp-step-next {
+    background: var(--primary);
+    color: var(--on-primary);
+  }
+  /* Dòng trạng thái một hàng: bỏ chữ phụ để còn chỗ cho tên nước đi */
+  .pzp-src,
+  .pzp-counter small {
+    display: none;
+  }
+  .pzp-counter {
+    padding: 2px 8px;
+  }
+  .pzp-result .pzp-stat-num {
+    font-size: 2.4rem;
+  }
+}
+.pzp-goal-short {
+  display: none;
+}
+@media (max-width: 380px) {
+  .pzp-han {
+    font-size: 1.08rem;
+  }
+  .pzp-viet {
+    font-size: 0.82rem;
+  }
+  .pzp-goal-long {
+    display: none;
+  }
+  .pzp-viewing .gs-toolbar {
+    gap: 4px;
+  }
+  .pzp-viewing .gs-toolbar .act,
+  .pzp-viewing .gs-view .act-flip {
+    padding: 0 2px;
+    font-size: 0.66rem;
+  }
+  .pzp-goal-short {
+    display: inline;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text);
+  }
+  .pzp-goal.is-proven .pzp-goal-short {
+    color: var(--gold-ink);
+  }
+}
+
+/* ---- Máy tính / máy tính bảng ngang: thẻ thế cờ là dòng đầu của khung bên phải */
+@media (min-width: 761px) and (min-aspect-ratio: 851/1000) {
+  .play.pzp > .pzp-head {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-areas:
+      'id prev next'
+      'name name name'
+      'goal goal goal';
+    column-gap: 2px;
+    row-gap: 3px;
+    min-height: 0;
+    padding: 10px 10px 12px 16px;
+  }
+  .pzp-nav {
+    --btn-h: 32px;
+  }
+  .pzp-name {
+    flex-wrap: wrap;
+    margin-top: 1px;
+  }
+  .pzp-han {
+    font-size: 1.42rem;
+  }
+  .pzp-viet {
+    white-space: normal;
+    font-size: 0.95rem;
+  }
+  .pzp-goal {
+    margin: 5px 6px 0 0;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    font-size: 0.82rem;
+  }
+  .pzp-goal.is-proven {
+    background: var(--gold-soft);
+  }
+  .pzp-goal-text {
+    white-space: normal;
+  }
+  /* Thanh thao tác mảnh: các nút từng nước chỉ còn biểu tượng */
+  .play.pzp .pzp-sol-actions .pzp-step {
+    width: 34px;
+    padding: 0;
+  }
+  .play.pzp .pzp-sol-actions .pzp-step .act-label {
+    display: none;
+  }
+}
+@media (min-width: 761px) and (min-aspect-ratio: 851/1000) and (max-height: 820px) {
+  .play.pzp > .pzp-head {
+    padding: 8px 8px 10px 14px;
+  }
+  .pzp-han {
+    font-size: 1.28rem;
+  }
+  .pzp-goal {
+    margin-top: 3px;
+    padding: 5px 8px;
+    gap: 5px;
+    font-size: 0.79rem;
+  }
+}
+
+/* Thế chưa có tên Hán Việt (101–200) */
+.pz-viet.is-missing,
+.pzp-viet.is-missing {
+  font-weight: 500;
+  font-style: italic;
+  color: var(--muted);
+}
+
+/* Đã đăng nhập: ghi chú về các thế giải khi chưa đăng nhập (đang chờ chuyển / không chuyển được) */
+.pz-carry {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.pz-carry .icon {
+  flex: none;
+  margin-top: 2px;
+}
+.pz-carry .link-btn {
+  font-size: inherit;
+}

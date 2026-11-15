@@ -1,0 +1,21 @@
+# Caddy: tự xin và gia hạn chứng chỉ HTTPS (Let's Encrypt) cho DOMAIN, chuyển mọi yêu cầu (kể cả WebSocket) vào app.
+# Điều kiện: tên miền đã trỏ (bản ghi A/AAAA) về IP của server và cổng 80 + 443 mở ra Internet.
+#
+# Biến (docker-compose.prod.yml lấy từ deploy/prod.env):
+#   SITE_ADDRESS    mặc định = DOMAIN (Caddy tự lo HTTPS). Đứng sau một web server / proxy khác đã lo HTTPS và chuyển
+#                   tiếp bằng HTTP thường: đặt http://<DOMAIN> (Caddy chỉ nghe HTTP, không chuyển hướng sang https —
+#                   nếu không sẽ chuyển hướng vòng tròn).
+#   TRUSTED_PROXIES để trống = không tin ai: Caddy bỏ X-Forwarded-For gửi tới và ghi IP thật của bên kết nối (chống giả
+#                   IP). Có proxy / CDN đứng trước: ghi dải IP của nó (vd private_ranges, hoặc dải IP do CDN công bố)
+#                   để Caddy giữ IP người dùng do proxy đó gửi; app khi đó đặt TRUST_PROXY=2.
+# Chi tiết: README mục "Triển khai bằng Docker" → "Đứng sau web server / CDN khác".
+{
+	servers {
+		trusted_proxies static {$TRUSTED_PROXIES}
+	}
+}
+
+{$SITE_ADDRESS} {
+	encode zstd gzip
+	reverse_proxy app:3000
+}

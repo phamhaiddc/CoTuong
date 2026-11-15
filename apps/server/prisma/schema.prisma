@@ -1,0 +1,262 @@
+// Dữ liệu chính theo đặc tả mục 7.
+// Bổ sung so với đặc tả: users.username_key (đảm bảo tên hiển thị duy nhất không phân biệt hoa thường),
+// ratings.final_rank (thứ hạng cuối quý cho hồ sơ), matches.season_id (ván tính cho quý bắt đầu),
+// matches.variant + matches.setup (cờ úp), bảng puzzle_progress (tiến độ cờ thế), bảng oauth_accounts (đăng nhập Google/Facebook),
+// chat_reports.reporter_id có thể NULL (người báo cáo đã bị xoá — báo cáo vẫn giữ).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  player
+  admin
+}
+
+enum GameType {
+  xiangqi
+  chess
+}
+
+enum GameMode {
+  pvp
+  ai
+}
+
+enum SeasonStatus {
+  active
+  finalizing
+  closed
+}
+
+/// p1 = player1 (Đỏ/Trắng) thắng, p2 = player2 (Đen) thắng
+enum MatchResult {
+  p1
+  p2
+  draw
+  aborted
+}
+
+enum ReportStatus {
+  open
+  resolved
+  dismissed
+}
+
+model User {
+  id              String    @id @default(uuid()) @db.Uuid
+  username        String    @db.VarChar(40)
+  usernameKey     String    @unique @map("username_key") @db.VarChar(80)
+  email           String    @unique @db.VarChar(254)
+  passwordHash    String    @map("password_hash")
+  avatarUrl       String?   @map("avatar_url")
+  role            Role      @default(player)
+  isBanned        Boolean   @default(false) @map("is_banned")
+  emailVerifiedAt DateTime? @map("email_verified_at") @db.Timestamptz(3)
+  /// Email được xác thực bằng cách nào: "email" (mã / liên kết / đặt lại mật khẩu — chứng minh sở hữu hộp thư),
+  /// "google" (Google email_verified), "facebook" (Facebook trả email lúc tạo tài khoản — CHƯA chứng minh hộp thư:
+  /// đặt lại mật khẩu sẽ gỡ liên kết Google/Facebook). null: chưa xác thực, hoặc tài khoản có trước cột này
+  emailVerifiedVia String?  @map("email_verified_via") @db.VarChar(16)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  /// Tài khoản máy chơi: tự vào ván xếp hạng khi người chơi chờ lâu không có đối thủ (không đăng nhập được)
+  isBot           Boolean   @default(false) @map("is_bot")
+  /// Mức của máy: "easy" | "medium" | "hard" (null nếu không phải máy)
+  botLevel        String?   @map("bot_level") @db.VarChar(8)
+  /// Tài khoản KHÁCH (chưa đăng nhập): danh tính tạm để chơi phòng riêng / Cờ úp; không xếp hạng, tự xoá sau một thời gian
+  isGuest         Boolean   @default(false) @map("is_guest")
+
+  ratings       Rating[]
+  matchesAsP1   Match[]        @relation("player1")
+  matchesAsP2   Match[]        @relation("player2")
+  seasonResults SeasonResult[]
+  chatMessages  ChatMessage[]
+  chatReports   ChatReport[]
+  puzzles       PuzzleProgress[]
+  oauthAccounts OAuthAccount[]
+
+  @@index([isGuest, createdAt])
+  @@map("users")
+}
+
+model Season {
+  id      String       @id @default(uuid()) @db.Uuid
+  game    GameType
+  year    Int
+  quarter Int
+  startAt DateTime     @map("start_at") @db.Timestamptz(3)
+  endAt   DateTime     @map("end_at") @db.Timestamptz(3)
+  status  SeasonStatus @default(active)
+
+  ratings Rating[]
+  results SeasonResult[]
+  matches Match[]
+
+  @@unique([game, year, quarter])
+  @@index([status])
+  @@map("seasons")
+}
+
+model Rating {
+  userId          String   @map("user_id") @db.Uuid
+  seasonId        String   @map("season_id") @db.Uuid
+  rating          Int      @default(0)
+  peakRating      Int      @default(0) @map("peak_rating")
+  wins            Int      @default(0)
+  losses          Int      @default(0)
+  draws           Int      @default(0)
+  gamesPlayed     Int      @default(0) @map("games_played")
+  /// Số ván thắng liên tiếp (thua / hoà về 0) — thưởng chuỗi thắng
+  winStreak       Int      @default(0) @map("win_streak")
+  /// Lần chơi ván xếp hạng gần nhất trong mùa (luật "không chơi thì tụt điểm")
+  lastRankedAt    DateTime? @map("last_ranked_at") @db.Timestamptz(3)
+  /// Thời điểm đạt mức điểm hiện tại (xếp thứ tự khi bằng điểm)
+  ratingUpdatedAt DateTime @default(now()) @map("rating_updated_at") @db.Timestamptz(3)
+  /// Thứ hạng chốt cuối quý (null nếu chưa đủ số ván)
+  finalRank       Int?     @map("final_rank")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  season Season @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+
+  @@id([userId, seasonId])
+  @@index([seasonId, rating(sort: Desc)])
+  @@map("ratings")
+}
+
+model Match {
+  id           String       @id @default(uuid()) @db.Uuid
+  game         GameType
+  mode         GameMode
+  ranked       Boolean      @default(false)
+  aiLevel      String?      @map("ai_level") @db.VarChar(16)
+  /// "15+10" (phút + giây cộng thêm); null = không giới hạn
+  timeControl  String?      @map("time_control") @db.VarChar(16)
+  /// Bên đi trước (Đỏ/Trắng); null = máy
+  player1Id    String?      @map("player1_id") @db.Uuid
+  /// Bên Đen; null = máy
+  player2Id    String?      @map("player2_id") @db.Uuid
+  seasonId     String?      @map("season_id") @db.Uuid
+  result       MatchResult?
+  endReason    String?      @map("end_reason") @db.VarChar(32)
+  /// Điểm thay đổi của player1
+  ratingChange Int?         @map("rating_change")
+  /// Điểm thay đổi của player2 (khác số đối của player1 khi điểm chạm sàn 0); null ở ván cũ = số đối của player1
+  ratingChange2 Int?        @map("rating_change2")
+  /// Chuỗi toạ độ: UCI (cờ vua) / ICCS (cờ tướng)
+  moves        String[]     @default([])
+  /// Biến thể: "standard" (cờ tướng / cờ vua thường) | "jieqi" (cờ úp, không tính điểm)
+  variant      String       @default("standard") @db.VarChar(16)
+  /// Cờ úp: cách xếp quân úp lúc đầu (bí mật trong lúc chơi; dùng để xem lại ván)
+  setup        String?
+  startedAt    DateTime     @default(now()) @map("started_at") @db.Timestamptz(3)
+  endedAt      DateTime?    @map("ended_at") @db.Timestamptz(3)
+
+  player1      User?         @relation("player1", fields: [player1Id], references: [id], onDelete: SetNull)
+  player2      User?         @relation("player2", fields: [player2Id], references: [id], onDelete: SetNull)
+  season       Season?       @relation(fields: [seasonId], references: [id], onDelete: SetNull)
+  chatMessages ChatMessage[]
+
+  @@index([player1Id, game, startedAt(sort: Desc)])
+  @@index([player2Id, game, startedAt(sort: Desc)])
+  @@index([seasonId, endedAt])
+  @@map("matches")
+}
+
+/// Top 10 đã chốt của mỗi mùa
+model SeasonResult {
+  seasonId String @map("season_id") @db.Uuid
+  rank     Int
+  userId   String @map("user_id") @db.Uuid
+  rating   Int
+
+  season Season @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([seasonId, rank])
+  @@index([userId])
+  @@map("season_results")
+}
+
+model ChatMessage {
+  id        String   @id @default(uuid()) @db.Uuid
+  matchId   String   @map("match_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  content   String   @db.VarChar(200)
+  isDeleted Boolean  @default(false) @map("is_deleted")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  match   Match        @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reports ChatReport[]
+
+  @@index([matchId, createdAt])
+  // Xoá tài khoản (dọn khách cũ) phải tìm tin nhắn theo người gửi — không có chỉ mục thì quét cả bảng cho mỗi người
+  @@index([userId])
+  @@map("chat_messages")
+}
+
+model ChatReport {
+  id         String       @id @default(uuid()) @db.Uuid
+  messageId  String       @map("message_id") @db.Uuid
+  /// Người báo cáo; null = tài khoản đó đã bị xoá (vd khách cũ được dọn) — báo cáo vẫn giữ cho admin xử lý
+  reporterId String?      @map("reporter_id") @db.Uuid
+  status     ReportStatus @default(open)
+  createdAt  DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  message  ChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  reporter User?       @relation(fields: [reporterId], references: [id], onDelete: SetNull)
+
+  @@unique([messageId, reporterId])
+  @@index([status, createdAt])
+  @@index([reporterId])
+  @@map("chat_reports")
+}
+
+/// Tiến độ cờ thế của từng người chơi (puzzle_id = số thứ tự thế trong bộ Thích tình nhã thú)
+model PuzzleProgress {
+  userId    String    @map("user_id") @db.Uuid
+  puzzleId  Int       @map("puzzle_id")
+  attempts  Int       @default(0)
+  solvedAt  DateTime? @map("solved_at") @db.Timestamptz(3)
+  /// Số nước (của bên đi trước) trong lần giải ngắn nhất
+  bestMoves Int?      @map("best_moves")
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, puzzleId])
+  @@map("puzzle_progress")
+}
+
+/// Tài khoản mạng xã hội (Google, Facebook) đã liên kết với người dùng
+model OAuthAccount {
+  id             String   @id @default(uuid()) @db.Uuid
+  /// "google" | "facebook"
+  provider       String   @db.VarChar(16)
+  /// Mã người dùng phía nhà cung cấp (Google: sub; Facebook: id)
+  providerUserId String   @map("provider_user_id") @db.VarChar(191)
+  userId         String   @map("user_id") @db.Uuid
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerUserId])
+  @@index([userId])
+  @@map("oauth_accounts")
+}
+
+/// Số liệu truy cập theo ngày (giờ Việt Nam) — chép định kỳ từ bộ đếm Redis (AnalyticsService) để giữ lâu dài
+model SiteDailyStat {
+  /// Ngày YYYY-MM-DD (GMT+7)
+  date      String   @id @db.VarChar(10)
+  pageViews Int      @default(0) @map("page_views")
+  visitors  Int      @default(0)
+  members   Int      @default(0)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@map("site_daily_stats")
+}

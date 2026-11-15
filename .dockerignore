@@ -1,0 +1,13 @@
+# Không đưa vào ảnh Docker: thư viện / bản build của máy dev (build lại trong ảnh), bí mật, tệp tạm
+**/node_modules
+**/dist
+**/*.tsbuildinfo
+**/.env
+**/.env.*
+!**/.env.example
+deploy/prod.env
+coverage
+*.log
+.git
+.vscode
+.idea

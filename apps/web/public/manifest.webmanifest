@@ -1,0 +1,12 @@
+{
+  "name": "Xe Pháo Mã – Cờ tướng & Cờ vua",
+  "short_name": "Xe Pháo Mã",
+  "description": "Chơi Cờ tướng và Cờ vua trực tuyến: đấu xếp hạng theo quý, phòng riêng với bạn bè, đấu với máy.",
+  "lang": "vi",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f4eee4",
+  "theme_color": "#b3261e",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

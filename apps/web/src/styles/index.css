@@ -1,0 +1,14 @@
+/* Thứ tự: token → nền tảng → khung trang → từng khu vực */
+@import './tokens.css';
+@import './base.css';
+@import './layout.css';
+@import './board.css';
+@import './home.css';
+@import './play.css';
+@import './leaderboard.css';
+@import './seasons.css';
+@import './profile.css';
+@import './auth.css';
+@import './admin.css';
+@import './coup.css';
+@import './puzzles.css';

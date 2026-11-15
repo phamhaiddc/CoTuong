@@ -1,0 +1,2168 @@
+/* ==========================================================================
+   Trang chủ: sảnh chọn chế độ (Xếp hạng / Phòng riêng / Đấu với máy) + Top 10 ngay bên dưới (cột trái),
+   phần giới thiệu cho khách, bàn cờ xem trước và cột phụ "Thêm cách chơi" (Cờ úp, Cờ thế) + ván mẫu.
+   Mọi quy tắc đều nằm dưới .home; lớp riêng dùng tiền tố hm- để không trùng lớp toàn cục của
+   trang khác. Giữ nguyên lớp kiểm thử: .mode-tabs, .room-code, label.choice, label.check.
+   Mốc màn hình: ≤760px điện thoại · 761–1199px máy tính bảng · ≥1200px máy tính
+   ========================================================================== */
+
+/* --------------------------------------------------------------- Lưới trang
+   Cột trái (.hm-main): sảnh ("Chọn cách chơi"), giới thiệu (người chưa đăng nhập), Top 10. Bên phải (.hm-aside): bàn cờ xem trước + cột phụ. */
+.home {
+  display: grid;
+  grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
+  grid-template-areas: 'main aside';
+  gap: 24px;
+  align-items: start;
+}
+.hm-main {
+  grid-area: main;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+/* Khoảng cách giữa các khối do gap lo (bỏ margin .panel + .panel của base.css để không bị gấp đôi) */
+.hm-main > .panel + .panel {
+  margin-top: 0;
+}
+
+/* --------------------------------------------------------------- Khách: phần giới thiệu */
+.home .hm-hero {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  container-type: inline-size;
+  padding: 26px 24px 22px;
+  background: radial-gradient(460px 240px at 100% 0%, color-mix(in srgb, var(--gold) 16%, transparent), transparent 70%),
+    radial-gradient(420px 260px at 0% 100%, color-mix(in srgb, var(--primary) 9%, transparent), transparent 70%),
+    var(--surface);
+}
+.home .hm-hero-art {
+  position: absolute;
+  z-index: -1;
+  top: -34px;
+  right: -22px;
+  font-family: var(--font-han);
+  font-size: 200px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--primary-ink);
+  opacity: 0.07;
+  transform: rotate(-10deg);
+  pointer-events: none;
+  user-select: none;
+}
+.home .hm-hero-art-chess {
+  font-family: 'Segoe UI Symbol', 'DejaVu Sans', 'Noto Sans Symbols 2', serif;
+  color: var(--text);
+  opacity: 0.06;
+}
+.home .hm-hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px 4px 5px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-2);
+}
+.home .hm-hero-eyebrow-icons {
+  display: inline-flex;
+}
+.home .hm-hero-eyebrow-icons .game-icon + .game-icon {
+  margin-left: -5px;
+}
+.home .hm-hero-title {
+  margin: 16px 0 10px;
+  font-size: 1.6rem;
+  /* Theo bề rộng khung giới thiệu: dòng đầu "Chơi … trực tuyến," luôn vừa một dòng */
+  font-size: clamp(1.4rem, 7.3cqi, 1.85rem);
+  font-weight: 800;
+  line-height: 1.16;
+  letter-spacing: -0.028em;
+  text-wrap: balance;
+}
+.home .hm-hero-title em {
+  font-style: normal;
+  color: var(--primary-ink);
+  white-space: nowrap;
+}
+.home .hm-hero-sub {
+  margin: 0 0 20px;
+  color: var(--text-2);
+  font-size: 0.98rem;
+  line-height: 1.6;
+  max-width: 46ch;
+}
+.home .hm-hero-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.home .hm-hero-cta .btn {
+  flex: 1 1 auto;
+}
+.home .hm-hero-cta .btn-ghost {
+  background: color-mix(in srgb, var(--surface-raised) 70%, transparent);
+}
+.home .hm-hero-features {
+  list-style: none;
+  margin: 22px 0 0;
+  padding: 18px 0 0;
+  border-top: 1px solid var(--border);
+  display: grid;
+  gap: 14px;
+}
+.home .hm-hero-features li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.home .hm-hf-ico {
+  flex: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.home .hm-tone-gold {
+  background: var(--gold-soft);
+  color: var(--gold-ink);
+}
+.home .hm-tone-primary {
+  background: var(--primary-soft);
+  color: var(--primary-ink);
+}
+.home .hm-tone-info {
+  background: var(--info-soft);
+  color: var(--info);
+}
+.home .hm-hf-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.35;
+}
+.home .hm-hf-text b {
+  font-size: 0.95rem;
+}
+.home .hm-hf-text span {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* --------------------------------------------------------------- Sảnh chọn chế độ */
+.home .hm-lobby {
+  padding: 0;
+}
+.home .hm-lobby-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 20px 14px;
+  border-radius: inherit;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--primary-soft) 80%, transparent), transparent);
+}
+.home .hm-lobby-emblem {
+  flex: none;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-sm), 0 0 0 1px var(--border);
+}
+.home .hm-lobby-heading {
+  flex: 1;
+  min-width: 0;
+}
+.home .hm-lobby-title {
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.home .hm-lobby-sub {
+  margin: 1px 0 0;
+  font-size: 0.88rem;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Thẻ chế độ: biểu tượng trên, nhãn dưới */
+.home .mode-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  margin: 0 20px;
+  padding: 4px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+.home .mode-tabs button {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-height: 62px;
+  padding: 7px 4px;
+  border: 0;
+  border-radius: calc(var(--radius) - 4px);
+  background: transparent;
+  color: var(--text-2);
+  font-weight: 600;
+  font-size: 0.86rem;
+  line-height: 1.2;
+  text-align: center;
+  cursor: pointer;
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+.home .mode-tabs button:hover {
+  color: var(--text);
+  background: color-mix(in srgb, var(--surface-raised) 55%, transparent);
+}
+.home .mode-tabs button.active {
+  color: var(--primary-ink);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-sm), 0 0 0 1px var(--border);
+}
+/* Ở giao diện tối, bề mặt "nổi" tối hơn nền thẻ: dùng bề mặt sáng hơn cho thẻ đang chọn */
+:root[data-theme='dark'] .home .mode-tabs button.active {
+  background: var(--surface-3);
+  box-shadow: var(--shadow-sm), 0 0 0 1px var(--border-strong);
+}
+.home .mode-tabs button:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+.home .hm-mode-ico {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 28px;
+  border-radius: var(--radius-pill);
+  transition: background var(--dur) var(--ease);
+}
+.home .mode-tabs button.active .hm-mode-ico {
+  background: var(--primary-soft);
+}
+.home .hm-mode-dot {
+  position: absolute;
+  top: 1px;
+  right: 4px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--ok);
+  box-shadow: 0 0 0 2px var(--surface-2);
+  animation: pulse 0.9s ease-in-out infinite alternate;
+}
+.home .hm-mode-label {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.home .hm-mode-panel {
+  --px: 20px;
+  padding: 16px var(--px) 20px;
+  animation: home-rise 220ms var(--ease);
+}
+.home .hm-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.home .hm-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+.home .hm-note .icon {
+  margin-top: 2px;
+  color: var(--info);
+}
+
+/* --------------------------------------------------------------- Danh sách đặc điểm có biểu tượng */
+.home .hm-facts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 9px;
+}
+.home .hm-facts li {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: var(--text-2);
+}
+.home .hm-facts b {
+  color: var(--text);
+  font-weight: 700;
+}
+.home .hm-fact-ico {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--primary-ink);
+}
+
+/* --------------------------------------------------------------- Thẻ người chơi (xếp hạng) */
+.home .hm-pcard {
+  --tier: var(--muted);
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  background: linear-gradient(140deg, color-mix(in srgb, var(--tier) 14%, var(--surface-raised)) 0%, var(--surface-raised) 62%);
+}
+.home .hm-pcard-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.home .hm-pcard-avatar {
+  flex: none;
+  display: inline-flex;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--surface-raised), 0 0 0 4px var(--tier);
+}
+.home .hm-pcard-id {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.home .hm-pcard-name {
+  align-self: flex-start;
+  max-width: 100%;
+  font-weight: 700;
+  font-size: 1.02rem;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.home .hm-pcard-name:hover {
+  color: var(--primary-ink);
+}
+.home .hm-pcard-rating {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1;
+}
+.home .hm-pcard-rating b {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+.home .hm-pcard-rating span {
+  margin-top: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.home .hm-pcard-meters {
+  display: grid;
+  gap: 11px;
+  margin-top: 13px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border-strong);
+}
+.home .hm-pcard-status {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+.home .hm-pcard-status-ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--gold-soft);
+  color: var(--gold-ink);
+}
+.home .hm-meter {
+  --meter: var(--primary);
+  display: grid;
+  gap: 6px;
+}
+.home .hm-meter-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 0.85rem;
+}
+.home .hm-meter-label {
+  color: var(--text-2);
+  font-weight: 600;
+  min-width: 0;
+}
+.home .hm-meter-label b {
+  color: var(--text);
+}
+.home .hm-meter-value {
+  flex: none;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+.home .hm-meter-track {
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-3);
+  overflow: hidden;
+}
+.home .hm-meter-fill {
+  display: block;
+  height: 100%;
+  min-width: 8px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--meter) 70%, transparent), var(--meter));
+  transition: width 600ms var(--ease);
+}
+
+/* Khung tải */
+.home .hm-pcard.is-loading {
+  background: var(--surface-raised);
+}
+.home .hm-sk-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  flex: none;
+}
+.home .hm-sk-text {
+  display: block;
+  height: 14px;
+  width: 70%;
+}
+.home .hm-sk-text.short {
+  width: 40%;
+}
+.home .hm-sk-rating {
+  width: 64px;
+  height: 34px;
+  flex: none;
+}
+.home .hm-sk-meter {
+  height: 30px;
+  margin-top: 14px;
+}
+.home .hm-sk-block {
+  height: 112px;
+}
+.home .hm-sk-line {
+  height: 44px;
+}
+.home .hm-sk-btn {
+  height: 44px;
+  width: 60%;
+}
+
+/* --------------------------------------------------------------- Nút chính */
+.home .hm-cta-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.home .hm-cta {
+  --btn-h: 54px;
+  font-size: 1.08rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+.home .hm-cta-note {
+  margin: 0;
+  text-align: center;
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+.home .hm-spinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2.5px solid color-mix(in srgb, currentColor 35%, transparent);
+  border-top-color: currentColor;
+  animation: spin 0.8s linear infinite;
+  flex: none;
+}
+.home .hm-notice-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-top: 4px;
+}
+.home .hm-notice-actions .link-btn {
+  min-height: 32px;
+}
+
+/* --------------------------------------------------------------- Đang tìm đối thủ */
+.home .hm-search {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  padding: 6px 0 0;
+}
+.home .hm-radar {
+  position: relative;
+  width: 132px;
+  height: 132px;
+  margin: 2px auto 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.home .hm-radar-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--primary);
+  opacity: 0.18;
+  transform: scale(0.94);
+  animation: home-ping 2.4s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
+}
+.home .hm-radar-ring:nth-child(3) {
+  animation-delay: 0.8s;
+}
+.home .hm-radar-ring:nth-child(4) {
+  animation-delay: 1.6s;
+}
+.home .hm-radar-sweep {
+  position: absolute;
+  inset: 12px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, color-mix(in srgb, var(--primary) 30%, transparent), transparent 28%),
+    var(--primary-soft);
+  animation: spin 2.6s linear infinite;
+}
+.home .hm-radar-core {
+  position: relative;
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-raised);
+  box-shadow: var(--shadow), 0 0 0 5px color-mix(in srgb, var(--surface-raised) 60%, transparent);
+}
+.home .hm-search-title {
+  margin: 0;
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+.home .hm-search-time {
+  font-size: 2.3rem;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--primary-ink);
+}
+.home .hm-search-hint {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+.home .hm-search-chips,
+.home .hm-ticket-facts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin: 4px 0 6px;
+}
+.home .hm-search-chips .chip,
+.home .hm-ticket-facts .chip {
+  font-size: 0.76rem;
+  padding: 3px 9px;
+}
+.home .hm-range {
+  width: 100%;
+  display: grid;
+  gap: 7px;
+  padding: 12px 14px;
+  margin-bottom: 6px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+.home .hm-range-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 0.86rem;
+  color: var(--text-2);
+}
+.home .hm-range-track {
+  position: relative;
+  height: 10px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-3);
+}
+.home .hm-range-band {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--gold), var(--primary), var(--gold));
+  transition: width 700ms var(--ease);
+}
+.home .hm-range-you {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: 50%;
+  width: 4px;
+  margin-left: -2px;
+  border-radius: 2px;
+  background: var(--text);
+  box-shadow: 0 0 0 2px var(--surface-2);
+}
+.home .hm-range-scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --------------------------------------------------------------- Chọn thời gian */
+.home .hm-time {
+  display: grid;
+  gap: 12px;
+}
+.home .hm-presets {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+.home .hm-preset {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  min-height: 52px;
+  padding: 6px 2px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-raised);
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease), color var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease);
+}
+.home .hm-preset b {
+  font-size: 0.98rem;
+  font-weight: 800;
+  line-height: 1.15;
+}
+.home .hm-preset span {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.home .hm-preset:hover {
+  border-color: var(--primary);
+}
+.home .hm-preset.active {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary-ink);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+.home .hm-preset.active span {
+  color: var(--primary-ink);
+}
+.home .hm-preset:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+.home .hm-steppers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.home .hm-stepper {
+  min-width: 0;
+}
+.home .hm-stepper label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.home .hm-stepper-ctl {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-raised);
+  overflow: hidden;
+  transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+.home .hm-stepper-ctl:focus-within {
+  border-color: var(--primary);
+  box-shadow: var(--focus-ring);
+}
+.home .hm-stepper.is-invalid .hm-stepper-ctl {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 18%, transparent);
+}
+.home .hm-stepper.is-invalid label {
+  color: var(--danger);
+}
+.home .hm-stepper-ctl input {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+  min-height: 40px;
+  padding: 0 2px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+.home .hm-stepper-ctl input:focus {
+  box-shadow: none;
+}
+.home .hm-stepper-ctl input::-webkit-outer-spin-button,
+.home .hm-stepper-ctl input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.home .hm-step-btn {
+  flex: none;
+  width: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: var(--surface-2);
+  color: var(--text-2);
+  cursor: pointer;
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+.home .hm-step-btn:hover:not(:disabled) {
+  background: var(--surface-3);
+  color: var(--primary-ink);
+}
+.home .hm-step-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.home .hm-step-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+.home .hm-field-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+.home .hm-field-error .icon {
+  margin-top: 1px;
+}
+.home .hm-label {
+  display: block;
+  padding: 0;
+  margin: 0 0 8px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* --------------------------------------------------------------- Phòng riêng */
+.home .hm-sect-head {
+  display: grid;
+  gap: 2px;
+}
+.home .hm-sect-title {
+  font-size: 1rem;
+  font-weight: 700;
+}
+.home .hm-sect-desc {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.home .divider {
+  margin: 2px 0;
+}
+.home .hm-code-form {
+  display: flex;
+  gap: 8px;
+}
+.home .hm-code-input {
+  flex: 1;
+  min-width: 0;
+  min-height: 48px;
+  padding: 8px 12px 8px calc(12px + 0.3em);
+  border: 1.5px dashed var(--border-strong);
+  background: var(--surface-2);
+  font-family: var(--font-mono);
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-align: center;
+  text-transform: uppercase;
+}
+.home .hm-code-input::placeholder {
+  font-family: var(--font);
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+.home .hm-code-input:focus {
+  border-style: solid;
+  background: var(--surface-raised);
+}
+.home .hm-code-form .btn {
+  --btn-h: 48px;
+  flex: none;
+}
+
+/* Đang chờ bạn bè */
+.home .hm-room {
+  gap: 12px;
+}
+.home .hm-vs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding-top: 4px;
+}
+.home .hm-vs-player {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+  width: 64px;
+}
+.home .hm-vs-player .avatar {
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--primary);
+}
+.home .hm-vs-empty {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed var(--border-strong);
+  color: var(--muted);
+  background: var(--surface-2);
+  animation: home-breathe 1.8s ease-in-out infinite;
+}
+.home .hm-vs-dots {
+  display: inline-flex;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+.home .hm-vs-dots i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--primary);
+  opacity: 0.5;
+  animation: bounce 1.1s ease-in-out infinite;
+}
+.home .hm-vs-dots i:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.home .hm-vs-dots i:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.home .hm-wait-text {
+  margin: -4px 0 2px;
+  text-align: center;
+  font-weight: 700;
+}
+.home .hm-ticket {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 12px 12px;
+  border-radius: var(--radius);
+  border: 1.5px dashed color-mix(in srgb, var(--primary) 45%, var(--border-strong));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--primary-soft) 75%, var(--surface-raised)), var(--surface-raised));
+}
+.home .hm-ticket-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.home .hm-ticket-code {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+}
+.home .room-code {
+  padding-left: 0.24em;
+  font-family: var(--font-mono);
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: 0.24em;
+  line-height: 1.15;
+  color: var(--primary-ink);
+  user-select: all;
+  white-space: nowrap;
+}
+.home .hm-ticket-facts {
+  margin: 2px 0 0;
+}
+.home .hm-invite {
+  display: grid;
+  gap: 8px;
+}
+.home .hm-invite .hm-label {
+  margin: 0;
+}
+.home .hm-link-row {
+  display: flex;
+  gap: 8px;
+}
+.home .hm-link-row input {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.86rem;
+  color: var(--text-2);
+}
+.home .hm-link-row .btn {
+  flex: none;
+  min-width: 118px;
+}
+/* Vừa sao chép xong: dấu tích xanh trong chốc lát */
+.home .btn.hm-copied {
+  color: var(--ok);
+  border-color: color-mix(in srgb, var(--ok) 45%, transparent);
+  background: var(--ok-soft);
+}
+.home .btn-quiet.hm-copied {
+  border-color: transparent;
+}
+.home .hm-wait-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* --------------------------------------------------------------- Đấu với máy: thẻ lựa chọn */
+.home .hm-choices {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+.home .hm-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.home label.choice {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 5px;
+  min-width: 0;
+  padding: 14px 6px 11px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-raised);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease), box-shadow var(--dur) var(--ease),
+    transform 80ms var(--ease);
+}
+.home label.choice:hover {
+  border-color: var(--border-strong);
+  background: color-mix(in srgb, var(--surface-2) 50%, var(--surface-raised));
+}
+.home label.choice:active {
+  transform: translateY(1px);
+}
+.home label.choice.active {
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary-soft) 70%, var(--surface-raised));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 14%, transparent);
+}
+.home label.choice:has(input:focus-visible) {
+  box-shadow: var(--focus-ring);
+}
+.home label.choice input[type='radio'] {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-strong);
+  background: var(--surface-raised);
+  cursor: pointer;
+  transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.home label.choice input[type='radio']:checked {
+  border-color: var(--primary);
+  background: radial-gradient(circle, var(--on-primary) 0 3px, var(--primary) 3.5px);
+}
+.home label.choice input[type='radio']:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+.home .hm-choice-title {
+  font-weight: 700;
+  font-size: 0.93rem;
+  line-height: 1.2;
+  color: var(--text);
+}
+.home label.choice.active .hm-choice-title {
+  color: var(--primary-ink);
+}
+.home .hm-choice-hint {
+  font-size: 0.74rem;
+  line-height: 1.3;
+  color: var(--muted);
+}
+
+/* Vạch độ khó */
+.home .hm-diff {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 22px;
+  margin-bottom: 2px;
+}
+.home .hm-diff i {
+  width: 6px;
+  border-radius: 2px;
+  background: var(--border-strong);
+  opacity: 0.55;
+}
+.home .hm-diff i:nth-child(1) {
+  height: 9px;
+}
+.home .hm-diff i:nth-child(2) {
+  height: 15px;
+}
+.home .hm-diff i:nth-child(3) {
+  height: 21px;
+}
+.home .hm-diff i.on {
+  opacity: 1;
+}
+.home .hm-diff-easy i.on {
+  background: var(--ok);
+}
+.home .hm-diff-medium i.on {
+  background: var(--warn);
+}
+.home .hm-diff-hard i.on {
+  background: var(--danger);
+}
+.home .hm-swatch {
+  display: block;
+  height: 31px;
+  margin: -4px 0 0;
+  filter: drop-shadow(0 1px 1px rgba(60, 30, 0, 0.3));
+}
+
+/* Giới hạn thời gian: dòng bật/tắt */
+.home .hm-timelimit {
+  display: grid;
+  gap: 10px;
+  padding: 4px 12px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.home .hm-timelimit.on {
+  background: var(--surface);
+  border-color: var(--border-strong);
+}
+.home label.check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.home .hm-check-ico {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  color: var(--primary-ink);
+}
+.home .hm-check-text {
+  flex: 1;
+  min-width: 0;
+}
+.home .hm-check-desc {
+  margin: -8px 0 0 42px;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+.home label.check input.hm-switch {
+  flex: none;
+  width: 44px;
+  height: 26px;
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: var(--radius-pill);
+  border: 0;
+  background-color: var(--border-strong);
+  background-image: radial-gradient(circle closest-side, var(--on-primary) 0 calc(100% - 1px), transparent 100%);
+  background-size: 20px 20px;
+  background-repeat: no-repeat;
+  background-position: 3px 50%;
+  cursor: pointer;
+  transition: background-color var(--dur) var(--ease), background-position var(--dur) var(--ease);
+}
+.home label.check input.hm-switch:checked {
+  background-color: var(--primary);
+  background-position: calc(100% - 3px) 50%;
+}
+.home label.check input.hm-switch:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* --------------------------------------------------------------- Khách: lời mời đăng nhập */
+.home .hm-login {
+  gap: 14px;
+}
+.home .hm-lp-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  background: var(--gold-soft);
+  border: 1px solid color-mix(in srgb, var(--gold) 30%, transparent);
+}
+.home .hm-lp-box p {
+  margin: 0;
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+.home .hm-lp-lock {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-raised);
+  color: var(--gold-ink);
+  box-shadow: var(--shadow-sm);
+}
+.home .hm-lp-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+/* --------------------------------------------------------------- Bên phải: bàn cờ xem trước, chú thích, Thêm cách chơi
+   Máy tính bảng (mặc định): bàn cờ → chú thích → hai thẻ chế độ. Điện thoại: hai thẻ chế độ lên trước bàn cờ.
+   Máy tính (≥1200px, xem cuối file): bàn cờ + cột phụ hẹp bên phải, cả khối dính khi cuộn. */
+.hm-aside {
+  grid-area: aside;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    'stage'
+    'cap'
+    'more';
+  gap: 14px;
+  align-content: start;
+}
+.home-board {
+  grid-area: stage;
+  min-width: 0;
+}
+/* Kích thước bàn do board.css tính theo chiều cao màn hình; trang chủ chỉ chừa chỗ cho
+   header + chú thích bên dưới (không có thanh người chơi) */
+.home-board .board-wrap {
+  --board-reserve: 156px;
+  --board-max: 780px;
+}
+.home-board .board-svg {
+  pointer-events: none;
+}
+
+/* Chú thích ván mẫu: một dòng dưới bàn cờ (danh sách nước chỉ hiện ở cột phụ trên máy tính) */
+.hm-cap {
+  grid-area: cap;
+  min-width: 0;
+}
+.hm-cap-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--muted);
+  text-align: center;
+}
+.hm-cap-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.hm-cap-kicker {
+  white-space: nowrap;
+}
+/* Một dòng "Ván mẫu: tên khai cuộc" (trên máy tính "Ván mẫu" thành nhãn nhỏ phía trên, bỏ dấu hai chấm) */
+.hm-cap-kicker::after {
+  content: ':';
+}
+.hm-cap-move {
+  min-width: 9.5em;
+  padding: 3px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  font-weight: 700;
+  font-size: 0.82rem;
+  box-shadow: var(--shadow-sm);
+}
+.hm-cap-moves {
+  display: none;
+}
+
+/* Thêm cách chơi: hai thẻ lối vào Cờ úp / Cờ thế */
+.hm-more {
+  grid-area: more;
+  min-width: 0;
+}
+.hm-more-title {
+  margin: 0 0 8px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.hm-more-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
+  gap: 10px;
+}
+.hm-more-list > li {
+  container: hm-mc / inline-size;
+  display: flex;
+  min-width: 0;
+}
+.hm-mc {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    'art head'
+    'desc desc'
+    'foot foot';
+  align-items: center;
+  gap: 8px 10px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  color: var(--text);
+  transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+.hm-mc:hover {
+  text-decoration: none;
+}
+.hm-mc:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+.hm-mc:active {
+  transform: translateY(1px);
+}
+@media (hover: hover) {
+  .hm-mc:hover {
+    border-color: color-mix(in srgb, var(--primary) 35%, var(--border));
+    box-shadow: var(--shadow);
+  }
+  .hm-mc:hover .hm-mc-go {
+    transform: translateX(3px);
+  }
+}
+.hm-mc-art {
+  grid-area: art;
+  display: inline-flex;
+  width: 44px;
+  height: 44px;
+}
+.hm-mc-head {
+  grid-area: head;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  line-height: 1.2;
+}
+.hm-mc-title {
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.hm-mc-tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+.hm-mc-desc {
+  grid-area: desc;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--text-2);
+}
+.hm-mc-foot {
+  grid-area: foot;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--primary-ink);
+}
+.hm-mc-go {
+  flex: none;
+  transition: transform var(--dur) var(--ease);
+}
+/* Thẻ rộng (điện thoại một cột, máy tính bảng ngang): hình bên trái, chữ bên phải */
+@container hm-mc (min-width: 300px) {
+  .hm-mc {
+    grid-template-areas:
+      'art head'
+      'art desc'
+      'art foot';
+    align-items: start;
+    gap: 3px 14px;
+  }
+  .hm-mc-head {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 8px;
+  }
+  .hm-mc-foot {
+    margin-top: 5px;
+  }
+}
+
+/* Minh hoạ trên thẻ: màu "vật liệu" quân cờ (gỗ, mặt quân, mực) — có bộ màu riêng cho giao diện tối */
+.hm-mc-art {
+  --art-wood: #efcf98;
+  --art-line: rgba(84, 48, 18, 0.5);
+  --art-edge: #a06c34;
+  --art-face: #f6e2bb;
+  --art-face-line: #8a5a2b;
+  --art-back: #9a6430;
+  --art-back-ring: rgba(255, 236, 204, 0.7);
+  --art-red: #b21f19;
+  --art-black: #1e1915;
+}
+:root[data-theme='dark'] .hm-mc-art {
+  --art-wood: #c99c60;
+  --art-line: rgba(44, 23, 9, 0.6);
+  --art-edge: #6a3e17;
+  --art-face: #ead2a6;
+  --art-face-line: #6a3e17;
+  --art-back: #7d4c22;
+  --art-back-ring: rgba(255, 228, 186, 0.62);
+  --art-red: #a81c16;
+  --art-black: #17120f;
+}
+.hm-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 1px 1px rgba(60, 30, 0, 0.25));
+}
+.hm-art .hm-art-wood {
+  fill: var(--art-wood);
+  stroke: var(--art-edge);
+  stroke-width: 1.4;
+}
+.hm-art .hm-art-lines {
+  fill: none;
+  stroke: var(--art-line);
+  stroke-width: 1.1;
+}
+.hm-art .hm-art-arrow {
+  fill: none;
+  stroke: var(--art-red);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 2.6 3;
+}
+.hm-art .hm-art-arrow-head {
+  fill: none;
+  stroke: var(--art-red);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.hm-art .hm-art-edge {
+  fill: var(--art-edge);
+}
+.hm-art .hm-art-face {
+  fill: var(--art-face);
+  stroke: var(--art-face-line);
+  stroke-width: 1;
+}
+.hm-art .hm-art-ring {
+  fill: none;
+  stroke: var(--art-red);
+  stroke-width: 1;
+}
+.hm-art .hm-art-back {
+  fill: var(--art-back);
+  stroke: var(--art-edge);
+  stroke-width: 1;
+}
+.hm-art .hm-art-back-ring {
+  fill: none;
+  stroke: var(--art-back-ring);
+  stroke-width: 1.2;
+  stroke-dasharray: 2 2.2;
+}
+.hm-art text {
+  text-anchor: middle;
+  font-weight: 700;
+}
+.hm-art .hm-art-char {
+  font-family: var(--font-han);
+  font-size: 14px;
+  fill: var(--art-red);
+}
+.hm-art .hm-art-char.is-sm {
+  font-size: 10px;
+}
+.hm-art .hm-art-char.is-black {
+  fill: var(--art-black);
+}
+.hm-art .hm-art-q {
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 800;
+  fill: var(--art-back-ring);
+}
+
+/* --------------------------------------------------------------- Hiệu ứng */
+@keyframes home-rise {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+@keyframes home-ping {
+  0% {
+    transform: scale(0.42);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+@keyframes home-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    border-color: var(--border-strong);
+  }
+  50% {
+    transform: scale(1.06);
+    border-color: var(--primary);
+  }
+}
+
+/* --------------------------------------------------------------- Máy tính bảng */
+@media (max-width: 1199px) {
+  .home {
+    gap: 20px;
+  }
+}
+
+/* --------------------------------------------------------------- Điện thoại */
+@media (max-width: 760px) {
+  .home {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'main'
+      'aside';
+    gap: 16px;
+  }
+  .hm-main {
+    gap: 14px;
+  }
+  .home .hm-hero {
+    padding: 20px 16px 18px;
+  }
+  .home .hm-hero-art {
+    font-size: 160px;
+    top: -26px;
+    right: -18px;
+  }
+  .home .hm-hero-title {
+    margin: 12px 0 8px;
+  }
+  .home .hm-hero-sub {
+    font-size: 0.94rem;
+    margin-bottom: 16px;
+  }
+  .home .hm-hero-cta {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+  .home .hm-hero-features {
+    margin-top: 18px;
+    padding-top: 16px;
+    gap: 12px;
+  }
+  .home .hm-lobby-head {
+    padding: 14px 16px 12px;
+  }
+  .home .hm-lobby-emblem {
+    width: 42px;
+    height: 42px;
+  }
+  .home .hm-lobby-title {
+    font-size: 1.18rem;
+  }
+  .home .mode-tabs {
+    margin: 0 12px;
+  }
+  .home .mode-tabs button {
+    min-height: 58px;
+    font-size: 0.82rem;
+  }
+  .home .hm-mode-panel {
+    --px: 14px;
+    padding: 14px var(--px) 16px;
+  }
+  /* Nút Bắt đầu luôn trong tầm tay khi phần cài đặt dài ra (nền mờ dần che nội dung cuộn bên dưới) */
+  .home .hm-cta-dock {
+    position: sticky;
+    bottom: calc(var(--bottom-nav-h) + var(--safe-bottom));
+    z-index: 3;
+    margin: -16px calc(-1 * var(--px)) -16px;
+    padding: 16px var(--px);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 0%, transparent), var(--surface) 34%);
+    border-radius: 0 0 calc(var(--radius) - 1px) calc(var(--radius) - 1px);
+  }
+  .home .hm-stepper-ctl input {
+    min-height: 44px;
+  }
+  .home .hm-step-btn {
+    width: 42px;
+  }
+  .home .hm-code-input {
+    font-size: 1.2rem;
+  }
+  /* Thẻ đang tìm gọn hơn để nút Huỷ tìm luôn nằm trên thanh điều hướng dưới */
+  .home .hm-radar {
+    width: 108px;
+    height: 108px;
+    margin-bottom: 4px;
+  }
+  .home .hm-radar-sweep {
+    inset: 10px;
+  }
+  .home .hm-radar-core {
+    width: 58px;
+    height: 58px;
+  }
+  .home .hm-search-time {
+    font-size: 2.05rem;
+  }
+  .home .room-code {
+    font-size: 2rem;
+  }
+  /* Hai thẻ chế độ (có thể bấm) lên trước bàn cờ xem trước (chỉ để ngắm) */
+  .hm-aside {
+    grid-template-areas:
+      'more'
+      'stage'
+      'cap';
+    gap: 12px;
+  }
+  .hm-more {
+    margin-bottom: 4px;
+  }
+  .hm-more-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .home-board {
+    justify-self: center;
+    width: 100%;
+    max-width: 460px;
+  }
+}
+
+@media (max-width: 380px) {
+  .home .mode-tabs {
+    margin: 0 10px;
+  }
+  .home .mode-tabs button {
+    font-size: 0.78rem;
+  }
+  .home .hm-mode-panel {
+    --px: 12px;
+  }
+  .home label.choice {
+    padding: 13px 4px 10px;
+  }
+  .home .hm-choice-title {
+    font-size: 0.86rem;
+  }
+  .home .hm-choice-hint {
+    font-size: 0.7rem;
+  }
+  .home .hm-preset b {
+    font-size: 0.9rem;
+  }
+  .home .hm-preset span {
+    font-size: 0.6rem;
+  }
+  .home .hm-step-btn {
+    width: 38px;
+  }
+  .home .hm-pcard-rating b {
+    font-size: 1.75rem;
+  }
+}
+
+/* ==========================================================================
+   Sảnh gọn — bảng tìm trận chiếm ít diện tích hơn (yêu cầu của người dùng):
+   cột sảnh 360px (bàn xem trước to hơn), thẻ chế độ một hàng thấp, thẻ người chơi gọn,
+   luật ván thành chip ngắn, khung "đang tìm" nhỏ lại. Đặt cuối file để thắng các quy tắc cũ.
+   (Cột sảnh 360px nằm ở quy tắc .home đầu file.)
+   ========================================================================== */
+.home .hm-lobby-head {
+  gap: 10px;
+  padding: 12px 16px 10px;
+}
+.home .hm-lobby-emblem {
+  width: 34px;
+  height: 34px;
+}
+.home .hm-lobby-emblem .game-icon {
+  width: 24px;
+  height: 24px;
+}
+.home .hm-lobby-title {
+  font-size: 1.1rem;
+}
+.home .hm-lobby-sub {
+  font-size: 0.8rem;
+}
+
+/* Thẻ chế độ: một hàng thấp, biểu tượng cạnh nhãn */
+.home .mode-tabs {
+  display: flex;
+  gap: 3px;
+  margin: 0 12px;
+  padding: 3px;
+}
+.home .mode-tabs button {
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-direction: row;
+  gap: 4px;
+  min-height: 38px;
+  padding: 4px;
+  font-size: 0.79rem;
+}
+.home .hm-mode-ico {
+  width: auto;
+  height: auto;
+}
+.home .mode-tabs button.active .hm-mode-ico {
+  background: none;
+}
+.home .hm-mode-ico .icon {
+  width: 16px;
+  height: 16px;
+}
+.home .hm-mode-dot {
+  top: -4px;
+  right: -6px;
+  width: 8px;
+  height: 8px;
+}
+.home .hm-mode-label {
+  overflow: hidden;
+  overflow-wrap: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.home .hm-mode-panel {
+  --px: 14px;
+  padding: 12px var(--px) 14px;
+}
+.home .hm-body {
+  gap: 10px;
+}
+
+/* Thẻ người chơi gọn */
+.home .hm-pcard {
+  padding: 10px 12px;
+}
+.home .hm-pcard-top {
+  gap: 10px;
+}
+.home .hm-pcard-avatar {
+  box-shadow: 0 0 0 2px var(--surface-raised), 0 0 0 3px var(--tier);
+}
+.home .hm-pcard-name {
+  font-size: 0.95rem;
+}
+.home .hm-pcard-rating b {
+  font-size: 1.6rem;
+}
+.home .hm-pcard-rating span {
+  margin-top: 2px;
+  font-size: 0.62rem;
+}
+.home .hm-pcard-meters {
+  gap: 7px;
+  margin-top: 9px;
+  padding-top: 9px;
+}
+.home .hm-meter {
+  gap: 4px;
+}
+.home .hm-meter-head {
+  font-size: 0.8rem;
+}
+.home .hm-meter-value {
+  font-size: 0.74rem;
+}
+.home .hm-meter-track {
+  height: 6px;
+}
+.home .hm-pcard-status {
+  gap: 6px;
+  font-size: 0.84rem;
+}
+.home .hm-pcard-status-ico {
+  width: 22px;
+  height: 22px;
+}
+.home .hm-pcard-next {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-size: 0.78rem;
+  color: var(--text-2);
+}
+.home .hm-pcard-next b {
+  color: var(--text);
+}
+.home .hm-pcard-next .icon {
+  color: var(--gold);
+}
+.home .hm-next-dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+/* Luật ván xếp hạng: chip ngắn (câu đầy đủ khi rê chuột / cho trình đọc màn hình) */
+.home .hm-rules {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.home .hm-rules li {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+  cursor: help;
+}
+.home .hm-rules .icon {
+  color: var(--primary-ink);
+}
+
+/* Nút chính */
+.home .hm-cta-wrap {
+  gap: 6px;
+}
+.home .hm-cta {
+  --btn-h: 48px;
+  font-size: 1.02rem;
+}
+.home .hm-cta-note {
+  font-size: 0.7rem;
+  line-height: 1.35;
+}
+
+/* Đang tìm đối thủ: gọn */
+.home .hm-search {
+  gap: 4px;
+  padding: 2px 0 0;
+}
+.home .hm-radar {
+  width: 92px;
+  height: 92px;
+  margin: 0 auto 4px;
+}
+.home .hm-radar-sweep {
+  inset: 8px;
+}
+.home .hm-radar-core {
+  width: 48px;
+  height: 48px;
+}
+.home .hm-search-title {
+  font-size: 0.98rem;
+}
+.home .hm-search-time {
+  font-size: 1.8rem;
+}
+.home .hm-search-hint {
+  font-size: 0.76rem;
+}
+.home .hm-search-chips {
+  margin: 2px 0 4px;
+}
+.home .hm-range {
+  gap: 5px;
+  margin-bottom: 4px;
+  padding: 8px 12px;
+}
+.home .hm-range-head {
+  font-size: 0.8rem;
+}
+.home .hm-range-track {
+  height: 8px;
+}
+
+@media (max-width: 1199px) {
+  .home {
+    grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
+    gap: 20px;
+  }
+}
+/* Điện thoại: một cột như trước; thẻ chế độ vẫn đủ cao để bấm (≥ 44px) */
+@media (max-width: 760px) {
+  .home {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+  .home .mode-tabs button {
+    min-height: 44px;
+  }
+  .home .hm-cta {
+    --btn-h: 50px;
+  }
+}
+@media (max-width: 380px) {
+  .home .mode-tabs button {
+    gap: 4px;
+    padding: 4px;
+    font-size: 0.76rem;
+  }
+}
+/* Điện thoại rất hẹp (≤340px): bỏ biểu tượng trên thẻ chế độ để nhãn không bị cắt (chấm báo vẫn hiện) */
+@media (max-width: 340px) {
+  .home .hm-mode-ico .icon {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   Top 10 dưới sảnh + bố cục máy tính (bàn cờ to + cột phụ "Thêm cách chơi" / ván mẫu)
+   ========================================================================== */
+.home .hm-top10 {
+  padding: 14px 14px 12px;
+}
+@media (max-width: 760px) {
+  .home .hm-top10 {
+    padding: 12px;
+  }
+}
+
+/* Máy tính (≥1200px): bàn cờ ở giữa cao vừa màn hình (header + 2 × 20px), cột phụ hẹp bên phải —
+   trên: Thêm cách chơi, dưới: ván mẫu (thẳng mép dưới bàn cờ). Cả khối dính khi cuộn cột trái. */
+@media (min-width: 1200px) {
+  .hm-aside {
+    /* Cột phụ lấy phần bề ngang bàn cờ không dùng tới (bàn cờ bị giới hạn bởi chiều cao màn hình):
+       100cqi = bề ngang vùng nội dung; 408px = cột sảnh 360 + 2 khoảng 24; bàn cờ rộng (cao − 100px) × tỉ lệ
+       (cờ tướng 0,9045, cờ vua 1). Màn hình cao (1920×1080) → cột phụ hẹp lại để bàn cờ to hơn. */
+    --board-aspect: 0.9045;
+    --rail-w: clamp(224px, 100cqi - 408px - (100vh - 100px) * var(--board-aspect), 264px);
+    position: sticky;
+    top: calc(var(--header-h) + 20px);
+    grid-template-columns: minmax(0, 1fr) var(--rail-w);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    grid-template-areas:
+      'stage more'
+      'stage cap'
+      'stage .';
+    gap: 0 24px;
+  }
+  .hm-aside.is-chess {
+    --board-aspect: 1;
+  }
+  .home-board .board-wrap {
+    --board-reserve: 100px;
+    --board-max: 960px;
+  }
+  .hm-more-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .hm-cap {
+    margin-top: 14px;
+    padding: 12px 12px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+  }
+  .hm-cap-head {
+    display: block;
+    margin-bottom: 8px;
+    text-align: left;
+  }
+  .hm-cap-name {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 3px 6px;
+  }
+  .hm-cap-name .icon {
+    color: var(--primary-ink);
+  }
+  .hm-cap-kicker {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+  .hm-cap-kicker::after {
+    content: none;
+  }
+  .hm-cap-title {
+    grid-column: 1 / -1;
+    font-size: 0.88rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--text);
+    text-wrap: balance;
+  }
+  .hm-cap-move {
+    display: none;
+  }
+  .hm-cap-moves {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 2px;
+    font-size: 0.8rem;
+  }
+  .hm-cap-moves li {
+    display: grid;
+    grid-template-columns: 1.5em minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 2px;
+  }
+  .hm-cap-no {
+    font-size: 0.74rem;
+    color: var(--muted);
+  }
+  .hm-cap-mv {
+    padding: 2px 4px;
+    border-radius: 6px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 600;
+    color: var(--text-2);
+    transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+  }
+  .hm-cap-mv.next {
+    color: var(--muted);
+  }
+  .hm-cap-mv.on {
+    background: var(--primary-soft);
+    color: var(--primary-ink);
+    font-weight: 700;
+  }
+}
+/* Màn hình máy tính thấp: bỏ danh sách nước để cột phụ không dài hơn bàn cờ */
+@media (min-width: 1200px) and (max-height: 700px) {
+  .hm-cap-moves {
+    display: none;
+  }
+  .hm-cap-head {
+    margin-bottom: 0;
+  }
+}
+
+/* --------------------------------------------------------------- Sảnh: chú thích giải thích thêm (dễ hiểu cho người mới) */
+.home .hm-range-note {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: var(--muted);
+  text-align: center;
+}
+.home .hm-notice-sub {
+  margin-top: 3px;
+  font-size: 0.82rem;
+  color: var(--text-2);
+}
+.home .hm-wait-head {
+  display: grid;
+  gap: 2px;
+  text-align: center;
+}
+.home .hm-wait-head .hm-wait-text {
+  margin: -4px 0 0;
+}
+.home .hm-wait-sub {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
+.home .hm-wait-note {
+  align-items: flex-start;
+  text-align: left;
+  line-height: 1.4;
+}
+.home .hm-wait-note .icon {
+  flex: none;
+  margin-top: 2px;
+}
+
+/* --------------------------------------------------------------- Trang lời mời phòng riêng (RoomPage): phần bổ sung
+   (kiểu chính của trang nằm ở auth.css) */
+.notice.warn.invite-notice > .icon {
+  color: var(--warn);
+}
+.invite-recheck {
+  margin-top: 4px;
+  min-height: 30px;
+}
+.invite-fact-link {
+  color: var(--primary-ink);
+  font-weight: 600;
+}

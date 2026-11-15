@@ -1,0 +1,35 @@
+{
+  "name": "co-tuong",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Xe Pháo Mã — web game Cờ tướng & Cờ vua, monorepo TypeScript (React + NestJS)",
+  "workspaces": [
+    "packages/game-core",
+    "packages/shared",
+    "packages/ai",
+    "apps/server",
+    "apps/web"
+  ],
+  "scripts": {
+    "build:packages": "npm run build -w @cotuong/game-core && npm run build -w @cotuong/shared && npm run build -w @cotuong/ai",
+    "build": "npm run build:packages && npm run build -w @cotuong/server && npm run build -w @cotuong/web",
+    "test": "npm run test -w @cotuong/game-core && npm run test -w @cotuong/shared && npm run test -w @cotuong/ai && npm run test -w @cotuong/web",
+    "typecheck": "npm run typecheck -w @cotuong/game-core -w @cotuong/shared -w @cotuong/ai -w @cotuong/server -w @cotuong/web",
+    "infra:up": "docker compose up -d",
+    "infra:down": "docker compose down",
+    "db:migrate": "npm run db:migrate -w @cotuong/server",
+    "db:deploy": "npm run db:deploy -w @cotuong/server",
+    "smoke": "npm run smoke -w @cotuong/server --",
+    "dev:server": "npm run dev -w @cotuong/server",
+    "dev:web": "npm run dev -w @cotuong/web",
+    "start": "npm run start -w @cotuong/server"
+  },
+  "devDependencies": {
+    "@types/node": "20.19.43",
+    "typescript": "5.9.3",
+    "vitest": "3.2.7"
+  },
+  "engines": {
+    "node": ">=20.11"
+  }
+}

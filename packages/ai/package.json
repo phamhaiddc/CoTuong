@@ -1,0 +1,17 @@
+{
+  "name": "@cotuong/ai",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI đấu với máy: minimax + alpha-beta tự viết, chạy trong Web Worker",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@cotuong/game-core": "0.1.0"
+  }
+}

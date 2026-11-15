@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": false,
+    "types": ["vite/client"],
+    "paths": {
+      "@cotuong/game-core": ["../../packages/game-core/src/index.ts"],
+      "@cotuong/shared": ["../../packages/shared/src/index.ts"],
+      "@cotuong/ai": ["../../packages/ai/src/index.ts"]
+    }
+  },
+  "include": ["src", "vite.config.ts"]
+}

@@ -1,0 +1,632 @@
+/* ==========================================================================
+   Bảng xếp hạng: huy chương hạng, dòng xếp hạng dùng chung, thẻ Top 10 ở trang chủ
+   (ngay dưới bảng tìm trận — chỉ có ở trang chủ), trang Mùa giải (Top 10 trực tiếp + các quý trước)
+   ========================================================================== */
+
+/* --------------------------------------------------------------- Huy chương hạng (RankMedal) */
+.medal {
+  --medal: var(--medal-gold);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.78rem;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.28);
+  background: radial-gradient(
+    circle at 32% 26%,
+    color-mix(in srgb, var(--medal) 50%, #fff) 0%,
+    var(--medal) 55%,
+    color-mix(in srgb, var(--medal) 78%, #000) 100%
+  );
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.35), 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+.medal-gold {
+  --medal: var(--medal-gold);
+}
+.medal-silver {
+  --medal: var(--medal-silver);
+}
+.medal-bronze {
+  --medal: var(--medal-bronze);
+}
+.rank-num {
+  min-width: 24px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.86rem;
+  color: var(--muted);
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}
+.rank-num-long {
+  font-size: 0.74rem;
+}
+
+/* Chữ tên cấp bậc: một số màu cấp (vàng, xanh lá, cam, xám) không đủ tương phản cho chữ nhỏ ở cả hai giao diện
+   → pha 38% màu chữ chính (tối ở giao diện sáng, sáng ở giao diện tối); khiên vẫn giữ nguyên màu cấp */
+:is(.lb, .seasons, .profile) .tier-name,
+.pf-tier-text {
+  color: color-mix(in srgb, var(--tier-c, currentColor) 62%, var(--text));
+}
+
+/* --------------------------------------------------------------- Thanh tiến độ */
+.lb-meter {
+  --meter-fill: var(--primary);
+  display: block;
+  position: relative;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-3);
+  overflow: hidden;
+}
+.lb-meter-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--meter-fill);
+  transition: width 400ms var(--ease);
+}
+
+/* --------------------------------------------------------------- Thẻ Top 10 (trang chủ): khung + tiêu đề */
+.lb {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+/* Tiêu đề bên trái, thẻ chọn game bên phải; thiếu chỗ thì thẻ chọn game xuống dòng */
+.lb-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+}
+.lb-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.lb-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+}
+.lb-title-icon {
+  color: var(--gold);
+}
+.lb-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  margin: 0;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.lb-days {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+/* Còn ≤ 7 ngày: nhắc bằng màu chính */
+.lb-days.is-urgent {
+  color: var(--primary-ink);
+}
+.lb-s-meta {
+  display: block;
+  width: 136px;
+  height: 12px;
+  margin-top: 4px;
+  border-radius: var(--radius-pill);
+}
+/* Thẻ chọn game: một hàng riêng rộng hết thẻ (giữ nguyên bố cục khi đang tải / lỗi / có dữ liệu) */
+.lb-tabs {
+  flex: 1 0 100%;
+  display: flex;
+}
+.lb-tabs button {
+  flex: 1;
+}
+
+/* Danh sách */
+.lb-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.lb-list > .lb-row {
+  position: relative;
+  border-radius: var(--radius-sm);
+}
+.lb-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 5px 8px;
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  transition: background var(--dur) var(--ease);
+}
+.lb-link:hover {
+  text-decoration: none;
+}
+.lb-link:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--primary);
+}
+.lb-name {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  line-height: 1.25;
+}
+.lb-sub {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.lb-username {
+  min-width: 0;
+  font-weight: 650;
+  font-size: 0.9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lb-name .tier-badge {
+  font-size: 0.74rem;
+}
+.lb-rating {
+  flex: none;
+  min-width: 3.4ch;
+  text-align: right;
+  font-weight: 800;
+  font-size: 0.94rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+.lb-you {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  height: 17px;
+  padding: 0 6px;
+  border-radius: var(--radius-pill);
+  background: var(--primary);
+  color: var(--on-primary);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Hạng 1–3: nền ánh kim + viền avatar theo màu huy chương */
+.lb-list > .lb-row.top1 {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--medal-gold) 20%, transparent), transparent 88%);
+}
+.lb-list > .lb-row.top2 {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--medal-silver) 22%, transparent), transparent 88%);
+}
+.lb-list > .lb-row.top3 {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--medal-bronze) 20%, transparent), transparent 88%);
+}
+.lb-list > .lb-row.top1 .avatar {
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 3.5px var(--medal-gold);
+}
+.lb-list > .lb-row.top2 .avatar {
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 3.5px var(--medal-silver);
+}
+.lb-list > .lb-row.top3 .avatar {
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 3.5px var(--medal-bronze);
+}
+.lb-list > .lb-row.me {
+  background: var(--primary-soft);
+  box-shadow: inset 3px 0 0 var(--primary);
+}
+
+/* Vị trí của bạn (ngoài Top 10) */
+.lb-mine {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border-strong);
+}
+.lb-mine-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.lb-mine-link {
+  flex-wrap: wrap;
+  row-gap: 2px;
+  background: var(--primary-soft);
+  box-shadow: inset 3px 0 0 var(--primary);
+  min-height: 52px;
+}
+.lb-mine-progress {
+  flex: 1 0 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  /* thẳng hàng với tên: hạng (24) + khoảng (10) + avatar (30) + khoảng (10) */
+  padding: 0 0 4px 74px;
+}
+.lb-mine-link .rank-num {
+  color: var(--primary-ink);
+}
+.lb-mine-sub {
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: var(--text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lb-mine-meter {
+  height: 4px;
+  max-width: 160px;
+  background: color-mix(in srgb, var(--primary) 14%, var(--surface));
+}
+
+/* Khách: lời mời đăng nhập */
+.lb-guest {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  font-size: 0.84rem;
+  line-height: 1.4;
+}
+.lb-guest > .icon {
+  flex: none;
+  color: var(--muted);
+}
+a.lb-guest-link {
+  transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+a.lb-guest-link b {
+  color: var(--primary-ink);
+}
+a.lb-guest-link:hover {
+  text-decoration: none;
+}
+a.lb-guest-link:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* Xem quý trước */
+.lb-archive {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-weight: 600;
+  font-size: 0.88rem;
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.lb-archive:hover {
+  text-decoration: none;
+}
+.lb-archive:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+.lb-archive:active {
+  background: var(--primary-soft);
+}
+.lb-archive-arrow {
+  transition: transform var(--dur) var(--ease);
+}
+
+/* Hiệu ứng rê chuột chỉ cho thiết bị có chuột (tránh "dính" trạng thái hover sau khi chạm) */
+@media (hover: hover) {
+  .lb-link:hover {
+    background: var(--surface-2);
+  }
+  .lb-mine-link:hover {
+    background: color-mix(in srgb, var(--primary-soft) 75%, var(--primary) 10%);
+  }
+  a.lb-guest-link:hover {
+    color: var(--text);
+    background: var(--primary-soft);
+    border-color: color-mix(in srgb, var(--primary) 30%, var(--border));
+  }
+  a.lb-guest-link:hover > .icon {
+    color: var(--primary-ink);
+  }
+  .lb-archive:hover {
+    color: var(--primary-ink);
+    background: var(--primary-soft);
+    border-color: color-mix(in srgb, var(--primary) 30%, var(--border));
+  }
+  .lb-archive:hover .lb-archive-arrow {
+    transform: translateX(3px);
+  }
+  a.podium-person:hover {
+    background: color-mix(in srgb, var(--medal-c) 10%, transparent);
+  }
+}
+.lb-link:active {
+  background: var(--surface-2);
+}
+
+/* Trạng thái rỗng / lỗi */
+.lb-empty .empty {
+  padding: 18px 6px 14px;
+}
+.lb-empty-title,
+.ss-empty-title {
+  font-weight: 700;
+  color: var(--text-2);
+  margin-bottom: 4px;
+}
+.lb-error {
+  align-items: center;
+}
+.lb-error .btn {
+  flex: none;
+}
+
+/* Khung xương khi đang tải */
+.lb-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.lb-srow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 5px 8px;
+}
+.lb-s-rank {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  flex: none;
+}
+.lb-s-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  flex: none;
+}
+.lb-s-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.lb-s-line {
+  display: block;
+  height: 10px;
+  border-radius: var(--radius-pill);
+}
+.lb-s-short {
+  width: 42% !important;
+  height: 8px;
+}
+.lb-s-num {
+  width: 36px;
+  height: 14px;
+  border-radius: var(--radius-pill);
+  flex: none;
+}
+
+/* Trang Mùa giải trên máy tính bảng / điện thoại: dòng cao hơn cho dễ chạm */
+@media (max-width: 1199px) {
+  .seasons .lb-link,
+  .seasons .lb-srow {
+    min-height: 50px;
+  }
+}
+
+/* --------------------------------------------------------------- Thẻ Top 10 (trang chủ): dòng gọn
+   Thẻ nằm trong cột 340–360px dưới bảng tìm trận. Đủ rộng (≥ 320px): mỗi dòng một hàng — hạng, avatar, tên,
+   cấp bậc, điểm. Hẹp hơn: tên và cấp bậc hai dòng như trước. Thiết bị cảm ứng: dòng cao ≥ 40px. */
+.lb-card {
+  container: lb-card / inline-size;
+}
+.lb-card .lb-list,
+.lb-card .lb-skeleton {
+  gap: 1px;
+}
+.lb-card .lb-link,
+.lb-card .lb-srow {
+  gap: 8px;
+  min-height: 34px;
+  padding: 3px 8px;
+}
+.lb-card .medal {
+  width: 22px;
+  height: 22px;
+  font-size: 0.72rem;
+}
+.lb-card .rank-num {
+  min-width: 22px;
+  font-size: 0.82rem;
+}
+.lb-card .lb-name {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+.lb-card .lb-username {
+  flex: 1 1 auto;
+  font-size: 0.88rem;
+}
+.lb-card .lb-sub {
+  flex: none;
+  gap: 5px;
+}
+.lb-card .lb-name .tier-badge {
+  font-size: 0.72rem;
+}
+/* Một hàng: chỉ còn khiên cấp bậc (tên cấp hiện khi rê chuột và có trong nhãn đọc của dòng) */
+.lb-card .lb-name .tier-name {
+  display: none;
+}
+.lb-card .lb-rating {
+  min-width: 4ch;
+  font-size: 0.9rem;
+}
+.lb-card .lb-you {
+  height: 16px;
+  padding: 0 5px;
+  font-size: 0.58rem;
+}
+.lb-card .lb-s-avatar {
+  width: 24px;
+  height: 24px;
+}
+.lb-card .lb-s-text {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.lb-card .lb-s-short {
+  width: 22% !important;
+}
+
+/* Vị trí của bạn: một dòng gọn, số ván đã chơi thành nhãn có vạch tiến độ */
+.lb-card .lb-mine {
+  gap: 4px;
+  padding-top: 8px;
+}
+.lb-card .lb-mine-label {
+  font-size: 0.68rem;
+}
+.lb-card .lb-mine-link {
+  flex-wrap: nowrap;
+  min-height: 38px;
+}
+.lb-mine-games {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 7px;
+  border-radius: var(--radius-pill);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--primary) 28%, transparent) var(--pct, 0%),
+    color-mix(in srgb, var(--surface-raised) 70%, transparent) var(--pct, 0%)
+  );
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 30%, transparent);
+}
+
+/* Khách + "Xem quý trước": gọn hơn */
+.lb-card .lb-guest {
+  gap: 8px;
+  padding: 8px 10px;
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+.lb-card .lb-archive {
+  gap: 6px;
+  min-height: 34px;
+  font-size: 0.84rem;
+}
+/* Chân thẻ Top 10: "Cách tính điểm" + "Các quý trước" (khi đã có mùa kết thúc) */
+.lb-foot {
+  display: flex;
+  gap: 8px;
+}
+.lb-foot .lb-archive {
+  flex: 1 1 0;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+/* Thẻ hẹp (máy tính bảng, điện thoại 360px): tên và cấp bậc hai dòng để tên không bị cắt */
+@container lb-card (max-width: 319.98px) {
+  .lb-card .lb-link,
+  .lb-card .lb-srow {
+    min-height: 40px;
+  }
+  .lb-card .lb-name {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+  .lb-card .lb-username {
+    flex: none;
+    font-size: 0.86rem;
+  }
+  .lb-card .lb-name .tier-badge {
+    font-size: 0.7rem;
+  }
+  .lb-card .lb-name .tier-name {
+    display: inline;
+  }
+  .lb-card .lb-s-text {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 5px;
+  }
+  .lb-card .lb-mine-link {
+    min-height: 44px;
+  }
+}
+
+/* Điện thoại / cảm ứng: mục bấm ≥ 40px */
+@media (max-width: 760px), (pointer: coarse) {
+  .lb-card .lb-tabs button {
+    min-height: 40px;
+  }
+  .lb-card .lb-link,
+  .lb-card .lb-srow {
+    min-height: 40px;
+  }
+  .lb-card .lb-mine-link {
+    min-height: 44px;
+  }
+  .lb-card .lb-archive,
+  .lb-card .lb-guest {
+    min-height: 40px;
+  }
+}
+
+/* Trang Mùa giải: xem seasons.css */

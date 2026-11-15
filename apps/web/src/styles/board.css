@@ -1,0 +1,632 @@
+/* ==========================================================================
+   Bàn cờ: Cờ tướng (gỗ + quân tròn sơn mài) và Cờ vua (quân Staunton vẽ bằng SVG).
+   Màu ở đây là "vật liệu" (gỗ, ngà, mực) nên được mã cứng — có bộ màu riêng cho giao diện tối.
+   Kích thước: bàn rộng hết chỗ được cấp; trên máy tính không cao quá màn hình trừ chỗ cho
+   2 thanh người chơi (--board-reserve, trang có thể ghi đè); điện thoại: rộng hết cột.
+   ========================================================================== */
+.board-wrap {
+  --board-reserve: 232px;
+  --board-ratio: 1;
+  --board-max: 640px;
+  --board-min: 300px;
+
+  /* Cờ tướng */
+  --xq-wood-1: #f8e0b0;
+  --xq-wood-2: #ecc78f;
+  --xq-wood-3: #d8a768;
+  --xq-ink: #3f2614;
+  --xq-ink-soft: rgba(63, 38, 20, 0.6);
+  --xq-river: rgba(255, 246, 225, 0.22);
+  --xq-grain: 0.34;
+  --xq-face-1: #fffaf0;
+  --xq-face-2: #f7e4c0;
+  --xq-face-3: #e3bf86;
+  --xq-face-line: rgba(122, 76, 32, 0.55);
+  --xq-edge-1: #c48b4c;
+  --xq-edge-2: #85521f;
+  --xq-red: #b21f19;
+  --xq-black: #1e1915;
+
+  /* Cờ vua */
+  --cb-frame-1: #74492a;
+  --cb-frame-2: #462913;
+  --cb-light: #efdab6;
+  --cb-dark: #b98a62;
+  --cb-grain: 0.24;
+  --cb-coord: rgba(255, 238, 210, 0.82);
+  --cb-last: rgba(214, 205, 58, 0.5);
+  --cb-sel: rgba(35, 132, 76, 0.5);
+  --cp-white-1: #ffffff;
+  --cp-white-2: #e5dac7;
+  --cp-white-line: #2b241e;
+  --cp-black-1: #5e5650;
+  --cp-black-2: #1a1714;
+  --cp-black-line: #0d0b09;
+  --cp-black-detail: #efe5d5;
+
+  /* Đánh dấu */
+  --board-move: #1d7d45;
+  --board-last: #1f63cf;
+  --board-check: #e3231a;
+  --board-hint: #e8590c;
+  --board-shadow: 0 1px 2px rgba(70, 40, 10, 0.22), 0 14px 32px -12px rgba(70, 40, 10, 0.5);
+
+  position: relative;
+  width: 100%;
+  max-width: min(var(--board-max), max(var(--board-min), calc((100vh - var(--board-reserve)) * var(--board-ratio))));
+  margin-inline: auto;
+}
+@supports (height: 100dvh) {
+  .board-wrap {
+    max-width: min(var(--board-max), max(var(--board-min), calc((100dvh - var(--board-reserve)) * var(--board-ratio))));
+  }
+}
+.board-wrap.is-xiangqi {
+  --board-ratio: 0.9045; /* 568 / 628 */
+}
+
+:root[data-theme='dark'] .board-wrap {
+  --xq-wood-1: #ddb67e;
+  --xq-wood-2: #c99c60;
+  --xq-wood-3: #a87841;
+  --xq-ink: #2c1709;
+  --xq-ink-soft: rgba(44, 23, 9, 0.62);
+  --xq-river: rgba(255, 240, 210, 0.12);
+  --xq-grain: 0.42;
+  --xq-face-1: #f7ecd6;
+  --xq-face-2: #e9d2a6;
+  --xq-face-3: #cba26a;
+  --xq-face-line: rgba(90, 52, 18, 0.6);
+  --xq-edge-1: #a46f39;
+  --xq-edge-2: #6a3e17;
+  --xq-red: #a81c16;
+  --xq-black: #17120f;
+
+  --cb-frame-1: #4f3019;
+  --cb-frame-2: #2b180a;
+  --cb-light: #dcc39d;
+  --cb-dark: #9f714c;
+  --cb-coord: rgba(240, 220, 188, 0.7);
+  --cb-last: rgba(205, 196, 50, 0.48);
+  --cb-sel: rgba(40, 140, 82, 0.55);
+  --cp-white-1: #fbf6ee;
+  --cp-white-2: #d9cdb8;
+
+  --board-move: #1f8a4c;
+  --board-shadow: 0 0 0 1px rgba(255, 214, 160, 0.07), 0 18px 40px -14px rgba(0, 0, 0, 0.85);
+}
+
+.board-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+  box-shadow: var(--board-shadow);
+}
+.xq-board {
+  aspect-ratio: 568 / 628;
+  border-radius: 2.817% / 2.548%; /* = rx 16 của khung gỗ */
+}
+.chess-board {
+  aspect-ratio: 1;
+  border-radius: 2.158%; /* = rx 12 */
+}
+.board-svg:focus {
+  outline: none;
+}
+.board-svg:focus-visible {
+  box-shadow: 0 0 0 3px var(--primary-ring), var(--board-shadow);
+}
+
+/* Lớp trang trí không nhận click (click đi xuống ô / giao điểm bên dưới) */
+.board-grain,
+.xq-static,
+.cb-frame,
+.coords,
+.last-move,
+.check-glow,
+.sq-marks,
+.hint-mark,
+.kb-cursor,
+.pc-shadow,
+.check-ring,
+.sel-ring,
+.xq-gloss,
+.target-capture,
+.target-tint,
+.target-dot {
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------- Cờ tướng: bàn */
+.xq-static .board-grain {
+  opacity: var(--xq-grain);
+}
+.xq-river-band {
+  fill: var(--xq-river);
+}
+.xq-border {
+  fill: none;
+  stroke: var(--xq-ink);
+  stroke-width: 3;
+}
+.xq-lines line {
+  stroke: var(--xq-ink);
+  stroke-width: 1.3;
+  stroke-linecap: square;
+}
+.xq-lines line.edge {
+  stroke-width: 2;
+}
+.xq-marks polyline {
+  fill: none;
+  stroke: var(--xq-ink);
+  stroke-width: 1.3;
+}
+.xq-river {
+  font-family: 'LXGW WenKai TC', var(--font-han);
+  font-size: 33px;
+  font-weight: 700;
+  fill: var(--xq-ink);
+  stroke: var(--xq-ink);
+  stroke-width: 0.6px;
+  opacity: 0.66;
+  text-anchor: middle;
+}
+.coords text {
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 600;
+  fill: var(--xq-ink-soft);
+  text-anchor: middle;
+}
+
+/* --------------------------------------------------------------- Quân (chung) */
+.xq-piece,
+.chess-piece {
+  cursor: default;
+}
+.board-svg.interactive .mine,
+.board-svg.interactive .target {
+  cursor: pointer;
+}
+.pc-move,
+.pc-lift {
+  transition: transform 150ms var(--ease);
+}
+.pc-shadow {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 150ms var(--ease), opacity 150ms var(--ease);
+}
+.arrive,
+.ghost {
+  pointer-events: none;
+}
+.arrive .pc-move {
+  animation: piece-arrive 220ms var(--ease) both;
+}
+@keyframes piece-arrive {
+  from {
+    transform: translate(var(--dx, 0), var(--dy, 0));
+  }
+  to {
+    transform: translate(0, 0);
+  }
+}
+/* Quân bị ăn: mờ dần và thu nhỏ dưới quân vừa tới */
+.ghost .pc-move {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: piece-captured 260ms var(--ease) forwards;
+}
+@keyframes piece-captured {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+}
+
+/* --------------------------------------------------------------- Cờ tướng: quân */
+.xq-face {
+  stroke: var(--xq-face-line);
+  stroke-width: 0.8;
+}
+.xq-ring {
+  fill: none;
+  stroke-width: 1.5;
+}
+.xq-piece.red .xq-ring {
+  stroke: var(--xq-red);
+}
+.xq-piece.black .xq-ring {
+  stroke: var(--xq-black);
+}
+.xq-char {
+  font-family: 'LXGW WenKai TC', var(--font-han);
+  font-size: 31px;
+  font-weight: 700;
+  text-anchor: middle;
+  stroke-width: 1.1px;
+  stroke-linejoin: round;
+  paint-order: stroke;
+}
+.xq-piece.red .xq-char {
+  fill: var(--xq-red);
+  stroke: var(--xq-red);
+}
+.xq-piece.black .xq-char {
+  fill: var(--xq-black);
+  stroke: var(--xq-black);
+}
+.xq-piece .xq-char-hl {
+  fill: #fff;
+  stroke: #fff;
+  opacity: 0.6;
+}
+.xq-piece.selected .pc-lift {
+  transform: translateY(-3.5px);
+}
+.xq-piece.selected .pc-shadow {
+  transform: translate(1px, 2px) scale(1.07);
+  opacity: 0.75;
+}
+@media (hover: hover) {
+  .board-svg.interactive .xq-piece.mine:not(.selected):hover .pc-lift {
+    transform: translateY(-1.5px);
+  }
+}
+.sel-ring {
+  fill: none;
+  stroke: var(--board-move);
+  stroke-width: 3;
+  filter: drop-shadow(0 0 2.5px var(--board-move));
+}
+.check-ring {
+  fill: none;
+  stroke: var(--board-check);
+  stroke-width: 3;
+  animation: check-pulse 1.1s ease-in-out infinite alternate;
+}
+@keyframes check-pulse {
+  from {
+    opacity: 0.45;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.last-move path {
+  fill: none;
+  stroke: var(--board-last);
+  stroke-width: 3.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.last-move .from {
+  opacity: 0.55;
+}
+
+/* --------------------------------------------------------------- Đích đến / gợi ý */
+.hit,
+.target-hit {
+  fill: transparent;
+}
+.target-dot {
+  fill: var(--board-move);
+  opacity: 0.8;
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 120ms var(--ease), opacity 120ms var(--ease);
+}
+.xq-board .target-dot {
+  stroke: rgba(255, 255, 255, 0.55);
+  stroke-width: 2;
+}
+.xq-board .target-capture {
+  fill: none;
+  stroke: var(--board-move);
+  stroke-width: 4.2;
+  stroke-linecap: round;
+}
+.target-tint {
+  fill: var(--board-move);
+  opacity: 0.16;
+}
+.chess-board .target-capture {
+  fill: var(--board-move);
+  opacity: 0.45;
+}
+.chess-board .target-dot {
+  opacity: 0.62;
+}
+@media (hover: hover) {
+  .target:hover .target-dot {
+    transform: scale(1.45);
+    opacity: 0.9;
+  }
+  .xq-board .target:hover .target-hit {
+    fill: rgba(29, 125, 69, 0.14);
+  }
+  .chess-board .target:hover .target-hit {
+    fill: rgba(29, 125, 69, 0.28);
+  }
+}
+.hint-mark circle {
+  fill: none;
+  stroke: var(--board-hint);
+  stroke-width: 3;
+  stroke-dasharray: 7 5;
+}
+.hint-arrow {
+  opacity: 0.82;
+}
+.hint-arrow line {
+  stroke: var(--board-hint);
+  stroke-linecap: round;
+}
+.hint-arrow polygon {
+  fill: var(--board-hint);
+}
+.kb-cursor {
+  display: none;
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 3;
+  stroke-dasharray: 8 5;
+}
+.board-svg:focus-visible .kb-cursor {
+  display: inline;
+}
+
+/* --------------------------------------------------------------- Cờ vua: bàn */
+.cb-inlay {
+  fill: none;
+  stroke: rgba(18, 9, 2, 0.55);
+  stroke-width: 2;
+}
+.cb-frame .board-grain {
+  opacity: 0.55;
+}
+.cb-grain {
+  opacity: var(--cb-grain);
+}
+.sq-light {
+  fill: var(--cb-light);
+}
+.sq-dark {
+  fill: var(--cb-dark);
+}
+.chess-board .coords text {
+  font-size: 13px;
+  fill: var(--cb-coord);
+}
+.last-sq {
+  fill: var(--cb-last);
+}
+.sel-sq {
+  fill: var(--cb-sel);
+}
+
+/* --------------------------------------------------------------- Cờ vua: quân */
+.cp-body {
+  stroke-width: 3;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.cp-detail {
+  fill: none;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.chess-piece.white .cp-body,
+.chess-piece.white .cp-detail {
+  stroke: var(--cp-white-line);
+}
+.chess-piece.white .cp-spot {
+  fill: var(--cp-white-line);
+}
+.chess-piece.black .cp-body {
+  stroke: var(--cp-black-line);
+}
+.chess-piece.black .cp-detail {
+  stroke: var(--cp-black-detail);
+}
+.chess-piece.black .cp-spot {
+  fill: var(--cp-black-detail);
+}
+.cp-seam {
+  display: none;
+  fill: none;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+}
+.chess-piece.black .cp-seam {
+  display: inline;
+  stroke: var(--cp-black-detail);
+  opacity: 0.4;
+}
+.chess-piece.selected .pc-lift {
+  transform: translateY(-5px);
+}
+.chess-piece.selected .pc-shadow {
+  transform: scale(1.1);
+  opacity: 0.7;
+}
+@media (hover: hover) {
+  .board-svg.interactive .chess-piece.mine:not(.selected):hover .pc-lift {
+    transform: translateY(-2.5px);
+  }
+}
+
+/* --------------------------------------------------------------- Chọn quân phong cấp */
+.promo-picker {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  background: rgba(24, 14, 6, 0.5);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  border-radius: 2.158%;
+  animation: fade-in 160ms var(--ease);
+}
+.promo-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: min(100%, 376px);
+  padding: 16px;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  animation: pop-in 200ms var(--ease);
+}
+.promo-title {
+  font-weight: 700;
+  font-size: 1rem;
+}
+.promo-options {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+}
+.promo-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 6px 6px 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-weight: 600;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease), transform 80ms var(--ease);
+}
+.promo-btn:hover {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--text);
+}
+.promo-btn:active {
+  transform: translateY(1px);
+}
+.promo-btn:focus-visible {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: var(--focus-ring);
+}
+.promo-piece {
+  width: 100%;
+  aspect-ratio: 1;
+  height: auto;
+  border-radius: var(--radius-sm);
+  background: var(--cb-light);
+}
+.promo-name {
+  line-height: 1.2;
+}
+.promo-cancel {
+  min-width: 120px;
+}
+
+@media (max-width: 760px) {
+  .board-wrap {
+    max-width: none;
+  }
+  .promo-picker {
+    padding: 10px;
+  }
+  .promo-card {
+    padding: 12px;
+    gap: 10px;
+  }
+  .promo-options {
+    gap: 6px;
+  }
+  .promo-btn {
+    padding: 5px 4px 7px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .arrive .pc-move,
+  .check-ring {
+    animation: none;
+  }
+}
+
+/* --------------------------------------------------------------- Cờ úp: quân úp (mặt sau) và hiệu ứng lật */
+.xq-back {
+  stroke-width: 0.9;
+}
+.xq-piece.hidden.red .xq-back {
+  fill: #9a2a20;
+  stroke: #5e140e;
+}
+.xq-piece.hidden.black .xq-back {
+  fill: #3a322d;
+  stroke: #15110e;
+}
+.xq-back-ring {
+  fill: none;
+  stroke: #e2bd78;
+  stroke-width: 1.3;
+  opacity: 0.85;
+}
+.xq-back-ring.inner {
+  stroke-width: 1;
+  opacity: 0.6;
+}
+.xq-back-mark {
+  fill: #e2bd78;
+  opacity: 0.55;
+}
+:root[data-theme='dark'] .xq-piece.hidden.red .xq-back {
+  fill: #86251c;
+}
+:root[data-theme='dark'] .xq-back-ring,
+:root[data-theme='dark'] .xq-back-mark {
+  stroke: #cfa862;
+}
+:root[data-theme='dark'] .xq-back-mark {
+  fill: #cfa862;
+}
+/* Quân vừa lật: xoay lật nhẹ sau khi trượt tới */
+.xq-piece.flip .pc-lift {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: piece-flip 360ms var(--ease) 200ms both;
+}
+@keyframes piece-flip {
+  0% {
+    transform: scaleX(1);
+  }
+  45% {
+    transform: scaleX(0.05);
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .xq-piece.flip .pc-lift {
+    animation: none;
+  }
+}

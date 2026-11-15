@@ -1,0 +1,14 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.env
+.env.local
+coverage/
+apps/web/dist/
+apps/server/dist/
+*.log
+.DS_Store
+
+# Cấu hình production (mật khẩu)
+deploy/prod.env
+deploy/.last-server

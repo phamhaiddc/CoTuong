@@ -1,0 +1,1399 @@
+/* ==========================================================================
+   Hồ sơ người chơi (/profile/:userId)
+   Đầu trang (ảnh bìa + avatar) · mùa hiện tại · tổng các mùa · huy hiệu các quý trước · lịch sử ván đấu
+   ========================================================================== */
+.profile {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.profile .panel + .panel {
+  margin-top: 0;
+}
+
+/* Tiêu đề từng khối */
+.pf-sec-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-bottom: 14px;
+}
+.pf-sec-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.pf-kicker {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.pf-sec-title {
+  font-size: 1.18rem;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+}
+.pf-sec-note {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+/* "Cách tính điểm" → trang Mùa giải */
+.pf-rules-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  align-self: flex-start;
+  color: var(--text-2);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.pf-rules-link:hover {
+  color: var(--primary-ink);
+}
+.pf-rules-link .icon {
+  flex: none;
+}
+.pf-rules-inline {
+  display: inline-flex;
+  vertical-align: -2px;
+  white-space: nowrap;
+}
+.pf-empty-title {
+  font-weight: 700;
+  color: var(--text-2);
+  margin-bottom: 4px;
+}
+.pf-empty-cta {
+  margin-top: 12px;
+}
+.pf-fatal .empty {
+  padding: 40px 12px;
+}
+
+/* --------------------------------------------------------------- Đầu trang */
+.pf-hero {
+  padding: 0;
+  overflow: hidden;
+}
+.pf-cover {
+  --grid: color-mix(in srgb, var(--primary) 9%, transparent);
+  position: relative;
+  height: 116px;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(var(--grid) 1px, transparent 1px) -1px -1px / 34px 34px,
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px) -1px -1px / 34px 34px,
+    radial-gradient(460px 170px at 88% 0%, color-mix(in srgb, var(--gold) 28%, transparent), transparent 72%),
+    linear-gradient(118deg, color-mix(in srgb, var(--primary) 17%, var(--surface)), color-mix(in srgb, var(--gold) 15%, var(--surface)));
+}
+/* Hình quân Tướng (帥) / quân Vua (♚) mờ trên ảnh bìa */
+.pf-cover::after {
+  content: '\5E25';
+  position: absolute;
+  right: 30px;
+  top: 50%;
+  transform: translateY(-50%) rotate(-8deg);
+  font-family: var(--font-han);
+  font-size: 124px;
+  font-weight: 700;
+  line-height: 1;
+  color: color-mix(in srgb, var(--primary) 13%, transparent);
+  pointer-events: none;
+}
+.pf-hero.game-chess .pf-cover::after {
+  content: '\265A';
+  font-family: 'Segoe UI Symbol', 'Noto Sans Symbols 2', 'DejaVu Sans', serif;
+  font-weight: 400;
+  color: color-mix(in srgb, var(--text) 9%, transparent);
+}
+.pf-hero-body {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: 'avatar ident tabs';
+  align-items: end;
+  gap: 12px 20px;
+  padding: 0 24px 22px;
+}
+.pf-avatar-wrap {
+  grid-area: avatar;
+  position: relative;
+  z-index: 1;
+  margin-top: -52px;
+  line-height: 0;
+}
+.pf-avatar-wrap > .avatar,
+.pf-avatar-btn > .avatar {
+  box-shadow: 0 0 0 4px var(--surface), 0 8px 22px rgba(40, 25, 10, 0.18);
+}
+.pf-ident {
+  grid-area: ident;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 14px;
+}
+.pf-tabs {
+  grid-area: tabs;
+  margin-bottom: 2px;
+}
+.profile-name {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  min-width: 0;
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+.pf-name-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.profile-name .role-tag {
+  gap: 4px;
+  padding: 3px 9px;
+  font-size: 0.7rem;
+  letter-spacing: 0.03em;
+}
+.pf-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  color: var(--text-2);
+  font-size: 0.88rem;
+}
+.pf-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.pf-meta-item .icon {
+  color: var(--muted);
+}
+.pf-best {
+  gap: 5px;
+  padding: 3px 10px;
+  font-size: 0.76rem;
+  white-space: normal;
+}
+.pf-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+.pf-hint .icon {
+  flex: none;
+}
+
+/* Avatar có thể đổi (hồ sơ của chính mình) */
+.pf-avatar-btn {
+  position: relative;
+  display: block;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+  line-height: 0;
+}
+.pf-avatar-btn:focus-visible {
+  outline: none;
+}
+.pf-avatar-btn:focus-visible > .avatar {
+  box-shadow: 0 0 0 4px var(--surface), 0 0 0 7px var(--primary);
+}
+.pf-avatar-btn:disabled {
+  cursor: progress;
+}
+.pf-avatar-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border-radius: 50%;
+  /* lớp phủ đậm gấp đôi để chữ trắng đọc rõ trên ảnh/chữ cái đầu sáng màu */
+  background: var(--overlay);
+  box-shadow: inset 0 0 0 60px var(--overlay);
+  color: var(--on-primary);
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.2;
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease);
+}
+.pf-avatar-btn:focus-visible .pf-avatar-overlay,
+.pf-avatar-btn.is-busy .pf-avatar-overlay {
+  opacity: 1;
+}
+.pf-avatar-overlay .spinner {
+  border-color: color-mix(in srgb, var(--on-primary) 35%, transparent);
+  border-top-color: var(--on-primary);
+}
+.pf-avatar-cam {
+  position: absolute;
+  right: 0;
+  bottom: 2px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary);
+  color: var(--on-primary);
+  box-shadow: 0 0 0 3px var(--surface), var(--shadow-sm);
+  transition: transform var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.pf-avatar-btn:active .pf-avatar-cam {
+  background: var(--primary-hover);
+}
+.pf-avatar-btn.is-busy .pf-avatar-cam {
+  opacity: 0;
+}
+@media (hover: hover) {
+  .pf-avatar-btn:hover .pf-avatar-overlay {
+    opacity: 1;
+  }
+  .pf-avatar-btn:hover .pf-avatar-cam {
+    transform: scale(1.07);
+    background: var(--primary-hover);
+  }
+  a.pf-opp:hover {
+    color: var(--primary-ink);
+  }
+  a.pf-opp:hover .pf-opp-name {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .pf-page:hover:not(:disabled):not(.active) {
+    background: var(--surface-2);
+    color: var(--text);
+  }
+}
+
+/* --------------------------------------------------------------- Mùa hiện tại */
+.pf-days {
+  gap: 5px;
+  padding: 3px 10px;
+}
+.pf-stats {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-areas:
+    'rating rank peak'
+    'rating record record';
+  gap: 12px;
+}
+.pf-tile {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+.pf-tile-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.pf-tile-value {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+.pf-tile-sub {
+  font-size: 0.82rem;
+  color: var(--text-2);
+}
+.pf-tile-sub .chip {
+  gap: 4px;
+}
+.pf-rating {
+  --tier: var(--primary);
+  grid-area: rating;
+  gap: 10px;
+  background: radial-gradient(140% 120% at 0% 0%, color-mix(in srgb, var(--tier) 15%, var(--surface-2)) 0%, var(--surface-2) 65%);
+  border-color: color-mix(in srgb, var(--tier) 28%, var(--border));
+}
+.pf-rank {
+  grid-area: rank;
+}
+.pf-peak {
+  grid-area: peak;
+}
+.pf-record {
+  grid-area: record;
+}
+.pf-rating-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+}
+.pf-rating-value {
+  font-size: 3.1rem;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.pf-tier-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 11px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--tier) 13%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--tier) 32%, transparent);
+}
+.pf-tier-pill .tier-badge {
+  gap: 6px;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+.pf-tier-pill .tier-badge svg {
+  width: 16px;
+  height: 17px;
+}
+/* Ô điểm hạng cao 2 hàng (máy tính bảng / máy tính): số lớn, cấp bậc bên dưới */
+@media (min-width: 761px) {
+  .pf-rating-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin-top: 2px;
+  }
+  .pf-rating-value {
+    font-size: 3.5rem;
+  }
+}
+.pf-rating {
+  position: relative;
+  overflow: hidden;
+}
+.pf-rating-emblem {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  opacity: 0.9;
+  pointer-events: none;
+}
+.pf-rating > .pf-tile-label,
+.pf-rating-row {
+  padding-right: 64px;
+}
+.pf-next {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pf-next-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  font-size: 0.86rem;
+  color: var(--text-2);
+}
+.pf-next-row b:not(.pf-tier-text) {
+  color: var(--text);
+}
+.pf-next-num {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+.pf-next-top {
+  color: var(--gold-ink);
+  font-weight: 700;
+}
+.pf-next-top .icon {
+  vertical-align: -3px;
+}
+/* Thang cấp bậc */
+.pf-ladder {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 3px;
+}
+.pf-ladder-seg {
+  position: relative;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--c) 16%, var(--surface-3));
+}
+.pf-ladder-seg:first-child {
+  border-radius: var(--radius-pill) 2px 2px var(--radius-pill);
+}
+.pf-ladder-seg:last-child {
+  border-radius: 2px var(--radius-pill) var(--radius-pill) 2px;
+}
+.pf-ladder-fill {
+  display: block;
+  height: 100%;
+  background: var(--c);
+  transition: width 400ms var(--ease);
+}
+.pf-ladder-seg.cur {
+  box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--c) 55%, transparent);
+}
+.pf-unranked {
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1.3;
+}
+.pf-unranked-count {
+  color: var(--text-2);
+  font-weight: 600;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+.pf-wld {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 18px;
+  font-size: 0.88rem;
+  color: var(--text-2);
+}
+.pf-wld-item b {
+  margin-right: 3px;
+  font-size: 1.5rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.pf-wld-item.win b {
+  color: var(--ok);
+}
+.pf-wld-item.loss b {
+  color: var(--danger);
+}
+.pf-wld-item.draw b {
+  color: var(--info);
+}
+.pf-wld-bar {
+  display: flex;
+  gap: 2px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  background: var(--surface-3);
+}
+.pf-wld-bar > span {
+  min-width: 4px;
+}
+.pf-wld-bar > .win {
+  background: var(--ok);
+}
+.pf-wld-bar > .loss {
+  background: var(--danger);
+}
+.pf-wld-bar > .draw {
+  background: var(--info);
+}
+
+/* Chưa chơi ván xếp hạng nào trong quý */
+.pf-noseason {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  border: 1px dashed var(--border-strong);
+}
+.pf-noseason-icon {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary-soft);
+  color: var(--primary-ink);
+}
+.pf-noseason-text {
+  flex: 1;
+  min-width: 0;
+}
+.pf-noseason-title {
+  font-weight: 700;
+}
+.pf-noseason-sub {
+  margin-top: 2px;
+  color: var(--text-2);
+  font-size: 0.85rem;
+}
+.pf-noseason-sub .tier-badge {
+  vertical-align: -2px;
+}
+.pf-noseason-cta {
+  flex: none;
+}
+
+/* Tổng các mùa */
+.pf-alltime {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.pf-alltime-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.pf-alltime-rate {
+  font-size: 0.84rem;
+  color: var(--text-2);
+}
+.pf-alltime-rate b {
+  color: var(--text);
+}
+.pf-totals {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+.pf-totals > div {
+  min-width: 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+.pf-totals dt {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+.pf-totals dd {
+  margin: 2px 0 0;
+  font-size: 1.3rem;
+  font-weight: 800;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+.pf-totals .win dd {
+  color: var(--ok);
+}
+.pf-totals .loss dd {
+  color: var(--danger);
+}
+.pf-totals .draw dd {
+  color: var(--info);
+}
+
+/* --------------------------------------------------------------- Các quý trước & huy hiệu */
+.pf-badges {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: 12px;
+}
+.season-card {
+  position: relative;
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 16px;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+.pf-emblem {
+  flex: none;
+  width: 48px;
+  display: flex;
+  justify-content: center;
+}
+.pf-badge-body {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.pf-badge-kicker {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.pf-badge-title {
+  font-size: 1.04rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+.pf-badge-tier {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  margin-top: 2px;
+  font-size: 0.82rem;
+  color: var(--text-2);
+}
+.pf-badge-tier-label::after {
+  content: ':';
+}
+.pf-badge-peak {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+.pf-badge-line {
+  font-size: 0.82rem;
+  color: var(--text-2);
+}
+.pf-badge-line b {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.pf-badge-wld .win {
+  color: var(--ok);
+  font-weight: 600;
+}
+.pf-badge-wld .loss {
+  color: var(--danger);
+  font-weight: 600;
+}
+.pf-badge-wld .draw {
+  color: var(--info);
+  font-weight: 600;
+}
+.pf-tier-emblem {
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.16));
+}
+
+/* Huy hiệu Top 10: thẻ ánh vàng */
+.season-card.is-top {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--gold) 24%, var(--surface)) 0%,
+    color-mix(in srgb, var(--gold) 9%, var(--surface)) 55%,
+    var(--surface) 100%
+  );
+  border-color: color-mix(in srgb, var(--gold) 50%, var(--border));
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--gold) 16%, transparent);
+}
+.season-card.is-top::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    112deg,
+    transparent 30%,
+    color-mix(in srgb, var(--surface-raised) 45%, transparent) 42%,
+    transparent 54%
+  );
+}
+.season-card.is-top .pf-badge-title {
+  color: var(--gold-ink);
+}
+.season-card.is-top .pf-badge-kicker {
+  color: color-mix(in srgb, var(--gold-ink) 80%, transparent);
+}
+
+/* Huy chương (SVG) */
+.pf-medal {
+  --m: var(--medal-gold);
+  overflow: visible;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.2));
+}
+.pf-medal-silver {
+  --m: var(--medal-silver);
+}
+.pf-medal-bronze {
+  --m: var(--medal-bronze);
+}
+.pf-medal-top {
+  --m: var(--gold);
+}
+.pf-medal .s1 {
+  stop-color: color-mix(in srgb, var(--m) 45%, #fff);
+}
+.pf-medal .s2 {
+  stop-color: var(--m);
+}
+.pf-medal .s3 {
+  stop-color: color-mix(in srgb, var(--m) 72%, #000);
+}
+.pf-medal-ribbon.a {
+  fill: var(--primary);
+}
+.pf-medal-ribbon.b {
+  fill: color-mix(in srgb, var(--primary) 72%, #000);
+}
+.pf-medal-ring {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.55);
+  stroke-width: 1.5;
+}
+.pf-medal-num {
+  fill: #fff;
+  font-family: var(--font);
+  font-size: 17px;
+  font-weight: 800;
+}
+.pf-medal-top .pf-medal-disc {
+  fill: var(--gold-soft);
+  stroke: var(--gold);
+  stroke-width: 2.5;
+}
+.pf-medal-top .pf-medal-ring {
+  stroke: color-mix(in srgb, var(--gold) 50%, transparent);
+  stroke-dasharray: 2 2.4;
+}
+.pf-medal-top .pf-medal-num {
+  fill: var(--gold-ink);
+}
+.pf-medal-top .pf-medal-ribbon.a {
+  fill: var(--gold);
+}
+.pf-medal-top .pf-medal-ribbon.b {
+  fill: color-mix(in srgb, var(--gold) 70%, #000);
+}
+
+/* --------------------------------------------------------------- Lịch sử ván đấu */
+/* Bảng hay thẻ tuỳ theo bề rộng thật của khối (không chỉ theo màn hình):
+   ≥760px nội dung (mọi cỡ máy tính, máy tính bảng nằm ngang) → bảng .table; hẹp hơn → danh sách thẻ */
+.pf-history {
+  container: pf-history / inline-size;
+  scroll-margin-top: calc(var(--header-h) + 12px);
+}
+.pf-hist-body {
+  transition: opacity var(--dur) var(--ease);
+}
+.pf-hist-body.is-loading {
+  opacity: 0.55;
+  pointer-events: none;
+}
+.pf-error-inline {
+  align-items: center;
+  margin-bottom: 12px;
+}
+.pf-error-inline .btn {
+  flex: none;
+}
+.pf-table {
+  font-size: 0.88rem;
+}
+.pf-table td {
+  padding: 10px;
+}
+.pf-table .pf-col-num {
+  text-align: right;
+}
+.pf-table td.pf-col-action {
+  width: 1%;
+  text-align: right;
+  white-space: nowrap;
+}
+.pf-cell-main {
+  font-weight: 600;
+  white-space: nowrap;
+}
+.pf-cell-sub {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+.pf-mode {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.pf-mode .icon,
+.pf-mcard-mode .icon {
+  color: var(--muted);
+}
+.pf-opp {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+  color: var(--text);
+  font-weight: 600;
+}
+a.pf-opp:hover {
+  text-decoration: none;
+}
+.pf-opp-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pf-bot {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-3);
+  color: var(--text-2);
+}
+/* Đối thủ không còn tài khoản (đã bị xoá) */
+.pf-opp-gone {
+  color: var(--muted);
+  font-weight: 500;
+}
+.pf-side {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+/* Màu quân cờ (vật lý): đỏ / đen / trắng */
+.pf-side-dot {
+  flex: none;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+}
+.pf-side-dot.side-red {
+  background: #c0392b;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18);
+}
+.pf-side-dot.side-black {
+  background: #2a211a;
+  box-shadow: 0 0 0 1px var(--border-strong);
+}
+.pf-side-dot.side-white {
+  background: #fbf7ef;
+  box-shadow: inset 0 0 0 1px #b9a98f;
+}
+.pf-outcome {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 9px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-3);
+  color: var(--text-2);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+.pf-outcome.outcome-win {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+.pf-outcome.outcome-loss {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.pf-outcome.outcome-draw {
+  background: var(--info-soft);
+  color: var(--info);
+}
+.pf-delta {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.pf-delta.pos {
+  color: var(--ok);
+}
+.pf-delta.neg {
+  color: var(--danger);
+}
+.pf-delta.zero {
+  color: var(--muted);
+}
+.pf-replay {
+  white-space: nowrap;
+}
+
+/* Thẻ ván đấu (điện thoại, máy tính bảng dọc) */
+.pf-mcards {
+  display: none;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@container pf-history (max-width: 759px) {
+  .pf-table-wrap {
+    display: none;
+  }
+  .pf-mcards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+    gap: 10px;
+  }
+}
+.pf-mcard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 12px 12px 12px 16px;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+.pf-mcard::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--border-strong);
+}
+.pf-mcard.outcome-win::before {
+  background: var(--ok);
+}
+.pf-mcard.outcome-loss::before {
+  background: var(--danger);
+}
+.pf-mcard.outcome-draw::before {
+  background: var(--info);
+}
+.pf-mcard-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pf-mcard-mode {
+  flex: 1;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-2);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+.pf-mcard-top .pf-delta {
+  font-size: 1.05rem;
+}
+.pf-mcard-opp {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.pf-vs {
+  flex: none;
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.pf-mcard-opp .pf-opp {
+  flex: 0 1 auto;
+}
+.pf-mcard-side {
+  flex: none;
+  margin-left: auto;
+  color: var(--text-2);
+  font-size: 0.82rem;
+}
+.pf-mcard-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 9px;
+  border-top: 1px solid var(--border);
+}
+.pf-mcard-when {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+.pf-mcard-foot .btn {
+  --btn-h: 40px;
+  flex: none;
+}
+
+/* Phân trang */
+.pf-pager {
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.pf-pager-info {
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-variant-numeric: tabular-nums;
+}
+.pf-pager-ctrl {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.pf-pages {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.pf-page {
+  min-width: 34px;
+  height: 34px;
+  padding: 0 6px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text-2);
+  font-weight: 700;
+  font-size: 0.88rem;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+.pf-page:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+.pf-page.active {
+  background: var(--primary);
+  color: var(--on-primary);
+  cursor: default;
+}
+.pf-page:disabled:not(.active) {
+  opacity: 0.5;
+  cursor: default;
+}
+.pf-page-gap {
+  min-width: 20px;
+  text-align: center;
+  color: var(--muted);
+}
+.pf-pages-compact {
+  display: none;
+}
+
+/* Khung xương */
+.pf-s-avatar {
+  display: block;
+  width: 104px;
+  height: 104px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px var(--surface);
+}
+.pf-ident-skel {
+  padding-top: 18px;
+  gap: 10px;
+}
+.pf-s-name {
+  display: block;
+  width: 220px;
+  max-width: 60vw;
+  height: 24px;
+  border-radius: var(--radius-pill);
+}
+.pf-s-meta {
+  display: block;
+  width: 160px;
+  height: 12px;
+  border-radius: var(--radius-pill);
+}
+.pf-s-title {
+  display: block;
+  width: 140px;
+  height: 18px;
+  margin-bottom: 16px;
+  border-radius: var(--radius-pill);
+}
+.pf-s-tile {
+  display: block;
+  min-height: 96px;
+  border-radius: var(--radius);
+}
+.pf-hist-skel {
+  display: flex;
+  flex-direction: column;
+}
+.pf-hist-srow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 4px;
+  border-bottom: 1px solid var(--border);
+}
+.pf-s-chip {
+  flex: none;
+  width: 52px;
+  height: 22px;
+  border-radius: var(--radius-pill);
+}
+.pf-s-avatar-sm {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+}
+.pf-s-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.pf-s-line {
+  display: block;
+  height: 10px;
+  border-radius: var(--radius-pill);
+}
+.pf-s-short {
+  width: 28% !important;
+  height: 8px;
+}
+.pf-s-btn {
+  flex: none;
+  width: 84px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+}
+
+/* --------------------------------------------------------------- Điện thoại */
+@media (max-width: 760px) {
+  .profile {
+    gap: 12px;
+  }
+  .pf-cover {
+    height: 92px;
+  }
+  .pf-cover::after {
+    right: 14px;
+    font-size: 96px;
+  }
+  .pf-hero-body {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'avatar' 'ident' 'tabs';
+    justify-items: center;
+    gap: 10px;
+    padding: 0 16px 16px;
+    text-align: center;
+  }
+  .pf-avatar-wrap {
+    margin-top: -56px;
+  }
+  .pf-ident {
+    align-items: center;
+    padding-top: 0;
+  }
+  .profile-name {
+    justify-content: center;
+    font-size: 1.42rem;
+  }
+  .pf-meta,
+  .pf-hint {
+    justify-content: center;
+  }
+  .pf-tabs {
+    display: flex;
+    width: 100%;
+    margin-bottom: 0;
+  }
+  .pf-tabs button {
+    flex: 1;
+    min-height: 40px;
+  }
+
+  .pf-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      'rating rating'
+      'rank peak'
+      'record record';
+    gap: 10px;
+  }
+  .pf-tile {
+    padding: 12px 14px;
+  }
+  .pf-rating-value {
+    font-size: 2.6rem;
+  }
+  .pf-tile-value {
+    font-size: 1.5rem;
+  }
+  .pf-unranked {
+    font-size: 1.02rem;
+  }
+  .pf-unranked-count {
+    display: block;
+    font-size: 0.86rem;
+  }
+  .pf-totals {
+    gap: 6px;
+  }
+  .pf-totals > div {
+    padding: 8px 8px;
+    text-align: center;
+  }
+  .pf-totals dd {
+    font-size: 1.15rem;
+  }
+
+  .pf-noseason {
+    flex-direction: column;
+    text-align: center;
+  }
+  .pf-noseason-cta {
+    width: 100%;
+  }
+
+  .season-card {
+    padding: 12px 14px;
+  }
+
+  .pf-pager {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .pf-pager-info {
+    text-align: center;
+  }
+  .pf-pager-ctrl {
+    justify-content: space-between;
+  }
+  .pf-pager-btn {
+    --btn-h: 44px;
+    min-width: 96px;
+  }
+  .pf-pages {
+    display: none;
+  }
+  .pf-pages-compact {
+    display: inline-flex;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@media (max-width: 380px) {
+  .pf-rating-value {
+    font-size: 2.3rem;
+  }
+  .pf-wld {
+    gap: 2px 12px;
+  }
+  .pf-wld-item b {
+    font-size: 1.3rem;
+  }
+  .pf-mcard-side .pf-side {
+    font-size: 0.78rem;
+  }
+}
+
+/* Đăng nhập nhanh bằng Google / Facebook (hồ sơ của chính mình) */
+.pf-social {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 12px);
+  background: var(--surface-2, var(--surface));
+}
+.pf-social-title {
+  margin: 0 0 8px;
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+.pf-social-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pf-social-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.pf-social-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font: 700 0.95rem/1 Arial, Helvetica, sans-serif;
+  flex: none;
+}
+.pf-social-mark.google {
+  background: #fff;
+  color: #4285f4;
+  border: 1px solid #dadce0;
+}
+.pf-social-mark.facebook {
+  background: #1877f2;
+  color: #fff;
+  padding-top: 3px;
+}
+.pf-social-name {
+  font-weight: 600;
+  min-width: 72px;
+}
+.pf-social-state {
+  color: var(--ok, #2e7d32);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+.pf-social-item .btn {
+  margin-left: auto;
+}
+.pf-social-note {
+  margin: 8px 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}

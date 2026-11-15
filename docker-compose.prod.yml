@@ -1,0 +1,140 @@
+# Triển khai production bằng Docker: app (API + WebSocket + web) + PostgreSQL + Redis + S3 (SeaweedFS) + Caddy (HTTPS).
+# Chạy (trên server, tại thư mục dự án):
+#   cp deploy/prod.env.example deploy/prod.env   # rồi điền giá trị thật
+#   docker compose --env-file deploy/prod.env -f docker-compose.prod.yml up -d --build
+# Chỉ Caddy mở cổng ra ngoài (80, 443). Hai mạng Docker riêng:
+#   edge    — Caddy + app: Caddy chỉ với tới được app.
+#   backend — app + Postgres + Redis + S3 (internal: không ra được Internet, không mở cổng). Redis và S3 đi kèm KHÔNG đặt
+#             mật khẩu → chỉ app được nối vào mạng này; đừng thêm dịch vụ khác vào đây.
+# Xem README mục "Triển khai bằng Docker".
+name: vuaco
+
+# Log của mọi container: tối đa 3 tệp × 10 MB (không có giới hạn thì log json-file lớn dần tới đầy đĩa)
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  app:
+    build: .
+    image: vuaco-app:latest
+    restart: unless-stopped
+    logging: *logging
+    # Đường dẫn file cấu hình (mặc định deploy/prod.env; đổi bằng biến APP_ENV_FILE khi cần)
+    env_file: ${APP_ENV_FILE:-deploy/prod.env}
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      DATABASE_URL: postgresql://${POSTGRES_USER:-vuaco}:${POSTGRES_PASSWORD:?Thiếu POSTGRES_PASSWORD trong deploy/prod.env}@postgres:5432/${POSTGRES_DB:-vuaco}?schema=public
+      REDIS_URL: redis://redis:6379
+      # Mặc định dùng dịch vụ s3 bên dưới; dùng S3 của nhà cung cấp khác thì đặt S3_ENDPOINT (và khoá) trong deploy/prod.env
+      S3_ENDPOINT: ${S3_ENDPOINT:-http://s3:8333}
+      S3_BUCKET: ${S3_BUCKET:-avatars}
+      # Số tầng proxy đứng trước app, dùng để lấy IP người dùng từ X-Forwarded-For (giới hạn số lần thử theo IP).
+      # Mặc định 1 (chỉ Caddy). Có thêm web server / CDN đứng trước Caddy: đặt TRUST_PROXY=2 trong deploy/prod.env
+      # (kèm TRUSTED_PROXIES cho Caddy) — README "Đứng sau web server / CDN khác".
+      TRUST_PROXY: ${TRUST_PROXY:-1}
+    networks:
+      - edge
+      - backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      s3:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    logging: *logging
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-vuaco}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Thiếu POSTGRES_PASSWORD trong deploy/prod.env}
+      POSTGRES_DB: ${POSTGRES_DB:-vuaco}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    logging: *logging
+    # Ghi xuống đĩa (appendonly) để khởi động lại không mất phiên đăng nhập / ván đang chơi; đầy bộ nhớ thì từ chối ghi
+    # thêm chứ không tự xoá dữ liệu. Không đặt mật khẩu: chỉ app (mạng backend) với tới được.
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy noeviction
+    volumes:
+      - redisdata:/data
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  # Lưu ảnh đại diện (chuẩn S3). KHÔNG kiểm tra khoá S3_ACCESS_KEY_ID / S3_SECRET_ACCESS_KEY (ai nối được vào là đọc/ghi
+  # được) → không mở cổng, chỉ app (mạng backend) với tới được. Muốn dùng S3 của nhà cung cấp khác: bỏ dịch vụ này
+  # và đặt S3_ENDPOINT / S3_ACCESS_KEY_ID / S3_SECRET_ACCESS_KEY / S3_REGION / S3_BUCKET trong deploy/prod.env
+  s3:
+    image: chrislusf/seaweedfs:3.80
+    restart: unless-stopped
+    logging: *logging
+    command: server -dir=/data -s3 -s3.port=8333
+    volumes:
+      - s3data:/data
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8333/"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  caddy:
+    image: caddy:2.8-alpine
+    restart: unless-stopped
+    logging: *logging
+    ports:
+      # Có thể ghi kèm địa chỉ, vd HTTP_PORT=127.0.0.1:8080 = chỉ máy này vào được (khi web server khác đứng trước)
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+      - "${HTTPS_PORT:-443}:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN:?Thiếu DOMAIN trong deploy/prod.env}
+      # Địa chỉ trang Caddy phục vụ: mặc định = DOMAIN (tự lo HTTPS); sau proxy khác đã lo HTTPS: http://<DOMAIN>
+      SITE_ADDRESS: ${SITE_ADDRESS:-${DOMAIN}}
+      # Dải IP proxy / CDN đứng trước Caddy được tin X-Forwarded-For; để trống = không tin ai
+      TRUSTED_PROXIES: ${TRUSTED_PROXIES:-}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - edge
+    # Chỉ mở cổng khi app đã sẵn sàng (HEALTHCHECK trong Dockerfile gọi /api/health) — không trả 502 trong lúc app đang
+    # chạy migration / khởi động. App không lên được thì "up" báo lỗi app unhealthy (xem docker compose logs app).
+    depends_on:
+      app:
+        condition: service_healthy
+
+networks:
+  edge:
+  backend:
+    internal: true
+
+volumes:
+  pgdata:
+  redisdata:
+  s3data:
+  caddy_data:
+  caddy_config:
